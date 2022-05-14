@@ -1,0 +1,4 @@
+filename,width,height,class,xmin,ymin,xmax,ymax
+250.png,448,448,feature,101,80,113,86
+250.png,448,448,feature,270,172,286,184
+250.png,448,448,feature,376,216,398,234
