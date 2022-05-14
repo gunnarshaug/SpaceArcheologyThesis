@@ -72,7 +72,10 @@ class CalculateBurialMoundResults:
 def calculateCoordinatesForBurialMounds(params):
     source = params.get('csv_path')
     custom_params = params.get('custom_params')
-    long, lat, pixel_size = [float(param) for param in custom_params]
+    params = [float(param) for param in custom_params]
+    long = params[0]
+    lat = params[1]
+    pixel_size = params[2] if len(params) > 2 else 0.25
 
     path = Path(source)
     new_file = os.path.join(

@@ -49,10 +49,13 @@
 					<label for="cutSizeInput" class="form-label">Cut size:</label>
 					<select id="cutSizeInput" class="form-select mb-3" aria-label="form-control" name="cut_size" required>
 						<option value=200 selected>200</option>
+						<option value=448>448</option>
 						<option value=400>400</option>
 						<option value=600>600</option>
 					</select>
-					<label for="customParamsInput" class="form-label">Custom parameters:</label>
+					<label for="customParamsInput" class="form-label">Top left coordinates in UTM (32N) or Decimal Degrees (WGS-1994) and optional image resolution:</label>
+				<div id="customParamsInput" class="form-text">Format: west, north, pixel size (UTM coordinates for burial mound models. Decimal degrees for SAR model. Pixel size is optional for burial mound models. Default is 0.25m)</i>
+				</div>
 					<input id="customParamsInput" type="text" class="form-control" name="custom_params">
 {#					<div class="form-check mt-3">#}
 {#						<input class="form-check-input" type="checkbox" id="flexCheckDefault" name="download_result">#}
