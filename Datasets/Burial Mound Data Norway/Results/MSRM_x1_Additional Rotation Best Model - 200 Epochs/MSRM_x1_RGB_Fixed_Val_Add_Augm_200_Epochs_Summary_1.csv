@@ -1,0 +1,10 @@
+# of Test Images: 46 
+# of True Positives: 54
+# of False Positives: 54
+# of False Negatives: 25
+Precision: 0.5
+Recall: 0.6835443037974683
+
+Model Settings:
+# of Epochs: 120
+Learning Rate: 0.005
