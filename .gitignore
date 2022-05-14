@@ -1,1 +1,10 @@
 .idea
+.DS_Store
+*.db
+
+venv
+**/storage/analyzed
+**/storage/images
+**/storage/temp
+
+/App/app/storage/temp/parts/0_0.png

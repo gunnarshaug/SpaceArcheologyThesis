@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<div class="container">
+		<a type="button" role="button" class="btn btn-success my-4" href="/mapbox/new">Upload new mapbox</a>
+		<table class="table">
+			<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">Location</th>
+				<th scope="col">Description</th>
+				<th scope="col">Delete</th>
+			</tr>
+			</thead>
+			<tbody>
+			{% for entry in mapboxes %}
+				<tr>
+					<th scope="row">{{ entry['id'] }}</th>
+					<td>{{ entry['location'] }}</td>
+					<td>{{ entry['description'] }}</td>
+					<td>
+						<form action="/mapbox/{{ entry['id'] }}/delete" method="post">
+							<input type="submit" value="Delete" class="btn btn-danger">
+						</form>
+					</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endblock %}

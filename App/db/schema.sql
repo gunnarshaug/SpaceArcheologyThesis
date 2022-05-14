@@ -1,0 +1,32 @@
+DROP TABLE IF EXISTS Mapbox;
+DROP TABLE IF EXISTS Image;
+DROP TABLE IF EXISTS Models;
+
+
+CREATE TABLE Mapbox (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  location TEXT NOT NULL,
+  description TEXT NOT NULL,
+  coordinates TEXT NOT NULL,
+  image_id INTEGER NOT NULL UNIQUE ,
+  FOREIGN KEY (image_id) REFERENCES Image (id) on delete cascade
+);
+
+CREATE TABLE Image (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  path TEXT NOT NULL
+);
+
+CREATE TABLE Models (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  description TEXT NULL,
+  path TEXT NOT NULL
+);
+
+CREATE TABLE Results (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  model_id INTEGER NOT NULL,
+  path TEXT NOT NULL,
+  FOREIGN KEY (model_id) REFERENCES Models (id) on delete no action
+);

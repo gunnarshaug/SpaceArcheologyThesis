@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<div class="container">
+		<form action="/mapbox/new" method="post">
+			<div class="mb-3">
+				<label for="inputTitle" class="form-label">Title</label>
+				<input type="text" name="title" class="form-control {{ 'is-invalid' if 'title' in errors }}" id="inputTitle"
+							 aria-describedby="emailHelp" value="{{ data.get('title', '') }}">
+				<div class="invalid-feedback">
+					{{ errors.get('title', '') }}
+				</div>
+			</div>
+			<div class="mb-3">
+				<label for="inputDescription" class="form-label">Description</label>
+				<input type="text" name="description" class="form-control {{ 'is-invalid' if 'description' in errors }}"
+							 id="inputDescription" value="{{ data.get('description', '') }}">
+				<div class="invalid-feedback">
+					{{ errors.get('description', '') }}
+				</div>
+			</div>
+			<div class="mb-3">
+				<label for="inputDescription" class="form-label">Coordinates</label>
+				<input type="text" name="coordinates" class="form-control {{ 'is-invalid' if 'coordinates' in errors }}"
+							 id="inputDescription" value="{{ data.get('coordinates', '') }}">
+				<div id="emailHelp" class="form-text">Format: longitude top left, latitude top left, longitude bottom right,
+					latitude bottom right. Split coordinates with semicolon ";" f.e.: <i>55.30294;37.27764;55.31935;37.26812</i>
+				</div>
+				<div class="invalid-feedback">
+					{{ errors.get('coordinates', '') }}
+				</div>
+			</div>
+			<a type="button" role="button" class="btn btn-success" href="/mapbox">Back</a>
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</form>
+	</div>
+{% endblock %}

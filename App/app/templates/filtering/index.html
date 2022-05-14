@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	{% with messages = get_flashed_messages() %}
+		{% if messages %}
+			{% for message in messages %}
+				<div class="alert alert-success" role="alert">{{ message }}</div>
+			{% endfor %}
+		{% endif %}
+	{% endwith %}
+	<div class="container mt-3">
+		<div class="row">
+			<div class="col" id="filtering-form">
+				<label for="filtering_result" class="form-label">Results folder:</label>
+				<select id="filtering_result" class="form-select" aria-label="Select model" name="source">
+					{% for row in results %}
+						<option {{ selected if loop.index == 0 }}
+							value={{ row[2] }}>{{ row[2] }}</option>
+					{% endfor %}
+				</select>
+				<label for="titleInput" class="form-label">Keep bounding boxes smaller than:</label>
+				<input id="titleInput" type="number" class="form-control" name="max_size">
+				<label for="titleInput" class="form-label">Keep bounding boxes bigger than:</label>
+				<input id="titleInput" type="number" class="form-control" name="min_size">
+				<label for="titleInput" class="form-label">Exclude height-width or width-height ratios above:</label>
+				<input id="titleInput" type="number" class="form-control" name="ratio">
+				<button id="add-to-filtering" class="mt-2 btn btn-success">Add to filtering</button>
+				<button id="filter-trigger" type="button" class="mt-2 btn btn-success" disabled>Filter!</button>
+			</div>
+		</div>
+		<div id="filtering-container" class="row mt-4">
+		</div>
+
+	</div>
+
+	<script>
+		const btn = document.getElementById("add-to-filtering");
+    const filterTriggerBtn = document.getElementById('filter-trigger');
+    const form = document.getElementById("filtering-form");
+    const container = document.getElementById('filtering-container');
+		const inputTags = ['input', 'select'];
+
+    const filters = {};
+    let filtersId = 0;
+    const addToFilters = params => {
+      filters[filtersId] = params
+			filtersId++;
+		}
+    const removeFromFilters = key => delete filters[key];
+
+    const getListText = (key, val) => {
+      const dic = {
+        source: () => {
+					const truncVal = [...val].filter((val, i) => i < 22).join("")
+					return truncVal.length < val.length ?  `Source: ${truncVal}...` : `Source: ${truncVal}`;
+				},
+        ratio: () => `Ratio: ${val}`,
+				min_size: () => `Bigger than: ${val}`,
+				max_size: () => `Smaller than: ${val}`
+			}
+      return dic[key]();
+		}
+
+     const gatherFormValues = () => Object.fromEntries(
+       [...form.children]
+				 .filter(({ tagName }) => inputTags.includes(tagName.toLowerCase()))
+				 .map(({ name, value }) => ([name, !value.length ? null : value]))
+		 )
+
+		const formCleanup = () => [...form.children]
+			.filter(({ tagName }) => inputTags.includes(tagName.toLowerCase()))
+			.filter(({ name }) => name !== 'source')
+			.forEach(input => input.value = '')
+
+		const addFiltering = (params) => {
+      const filterKeys = [...Object.keys(filters)];
+			if (filterKeys.length === 4) return;
+      const currentId = filtersId;
+			addToFilters(params)
+			const innerContainer = document.createElement('div')
+			innerContainer.id = currentId;
+			const list = document.createElement('ul')
+			list.className = 'list-group'
+			innerContainer.className = 'col-3 mb-2'
+			Object.entries(params)
+				.filter(([_, value]) => value !== null)
+				.forEach(([key, value]) => {
+          const item = document.createElement('li')
+					item.className = 'list-group-item'
+					item.innerText = getListText(key, value);
+					list.appendChild(item);
+			})
+			const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = "Remove entry";
+      deleteBtn.type = "button"
+			deleteBtn.className = "list-group-item list-group-item-danger list-group-item-action"
+			deleteBtn.addEventListener('click', () => {
+        removeFromFilters(currentId);
+        const el = document.getElementById(currentId);
+				el.remove();
+        filterTriggerBtn.disabled = [...Object.keys(filters)].length == 0;
+			})
+			list.appendChild(deleteBtn)
+
+			innerContainer.appendChild(list)
+			container.appendChild(innerContainer)
+		}
+
+    filterTriggerBtn.addEventListener('click', () => {
+
+      fetch("/filtering", {
+        method: "POST",
+				headers: {
+      		'Content-Type': 'application/json'
+    		},
+				body: JSON.stringify([...Object.values(filters)])
+			}).then((response) =>  window.history.pushState({}, null, response.url))
+		})
+
+
+    btn.addEventListener('click', () => {
+      const data = gatherFormValues();
+      formCleanup();
+      addFiltering(data);
+
+      const filterKeys = [...Object.keys(filters)];
+      filterTriggerBtn.disabled = filterKeys.length === 0;
+		});
+	</script>
+{% endblock %}
