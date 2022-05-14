@@ -1,0 +1,73 @@
+// This script combines Sentinel-1 SAR data into a multitemporal 4 band composite, with VV and VH polarization in both ascending and descending mode.  
+//Follow instructions in the script before running it. 
+
+// ////////////////////// IMPORT & COMPOSITE SENTINEL 1 COLLECTION ////////////////////////
+
+//Delete any existing geomtry Import record. Uncomment the line below and define coordinates for geometry, or alternateively define the geometry on the map. 
+//var geometry = ee.Geometry.BBox(63.69035, 39.7248, 64.1329, 40.046707)
+
+// Define the time range of data to combine in the composite. There is no data before 2014 available. 
+// Load the Sentinel-1 ImageCollection
+var s1 = ee.ImageCollection('COPERNICUS/S1_GRD')
+  .filterBounds(geometry)
+  .filterDate('2014-10-03', '2020-06-05');
+  
+// Print total Sentinel 1 images employed
+print('Sentinel 1 images:', s1);
+
+
+// Filter to get images from different look angles
+var asc = s1.filter(ee.Filter.eq('orbitProperties_pass', 'ASCENDING'));
+var desc = s1.filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'));
+
+
+var vvvhAsc = asc
+  // Filter to get images with VV and VH single polarization
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))
+  // Filter to get images collected in interferometric wide swath mode.
+  .filter(ee.Filter.eq('instrumentMode', 'IW'));
+var vvvhDesc = desc
+  // Filter to get images with VV and VH dual polarization
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))
+  // Filter to get images collected in interferometric wide swath mode.
+  .filter(ee.Filter.eq('instrumentMode', 'IW'));
+  
+// Create a composite from means at different polarizations and look angles.
+var composite = ee.Image.cat([
+  vvvhAsc.select('VV').median().float(),
+  vvvhAsc.select('VH').median().float(),
+  vvvhDesc.select('VV').median().float(),
+  vvvhDesc.select('VH').median().float(),
+]).clip(geometry);
+
+// Rename the bands so you can identify them when they are all joined together
+var s1comp = composite.select(
+    ['VV','VH','VV_1','VH_1'], // old names
+    ['s1vva','s1vha','s1vvd','s1vhd'] // new names
+);
+
+
+var fullComposite = ee.Image([s1comp]);
+
+// Reduction in the number of decimal places of the values of the resulting raster
+// This will not reduce noticeably the quality of the data but it will reduce significantly
+// the size of the resulting raster.
+var Composite = ee.Image(0).expression(
+    'round(img * 10000) / 10000', {
+      'img': fullComposite
+    });
+    
+print('Composite:', Composite);
+
+//Give the exported raster a name (description below). See the Docs tab for info on exporting to Google Drive or GEE Assets. 
+Export.image.toCloudStorage({ 
+  image: fullComposite,
+  description: 'SAR_Merv',
+  scale: 10,
+  maxPixels: 1e12,
+  region: geometry
+});
+
+print('Done')

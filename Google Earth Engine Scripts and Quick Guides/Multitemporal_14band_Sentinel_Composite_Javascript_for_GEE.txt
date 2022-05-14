@@ -1,0 +1,107 @@
+
+// ////////////////////// IMPORT & COMPOSITE SENTINEL 1 COLLECTION ////////////////////////
+
+// Load the Sentinel-1 ImageCollection
+var s1 = ee.ImageCollection('COPERNICUS/S1_GRD')
+  .filterBounds(geometry)
+  .filterDate('2014-10-03', '2020-06-05');
+  
+// Print total Sentinel 1 images employed
+print('Sentinel 1 images:', s1);
+
+
+// Filter to get images from different look angles
+var asc = s1.filter(ee.Filter.eq('orbitProperties_pass', 'ASCENDING'));
+var desc = s1.filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'));
+
+
+var vvvhAsc = asc
+  // Filter to get images with VV and VH single polarization
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))
+  // Filter to get images collected in interferometric wide swath mode.
+  .filter(ee.Filter.eq('instrumentMode', 'IW'));
+var vvvhDesc = desc
+  // Filter to get images with VV and VH dual polarization
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))
+  // Filter to get images collected in interferometric wide swath mode.
+  .filter(ee.Filter.eq('instrumentMode', 'IW'));
+  
+// Create a composite from means at different polarizations and look angles.
+var composite = ee.Image.cat([
+  vvvhAsc.select('VV').median().float(),
+  vvvhAsc.select('VH').median().float(),
+  vvvhDesc.select('VV').median().float(),
+  vvvhDesc.select('VH').median().float(),
+]).clip(geometry);
+
+// Rename the bands so you can identify them when they are all joined together
+var s1comp = composite.select(
+    ['VV','VH','VV_1','VH_1'], // old names
+    ['s1vva','s1vha','s1vvd','s1vhd'] // new names
+);
+
+
+
+// ////////////////////// IMPORT & COMPOSITE SENTINEL 2 COLLECTION ////////////////////////
+
+// Function to mask clouds using the Sentinel-2 QA band.
+function maskS2clouds(image) {
+  var qa = image.select('QA60');
+
+  // Bits 10 and 11 are clouds and cirrus, respectively.
+  var cloudBitMask = 1 << 10;
+  var cirrusBitMask = 1 << 11;
+
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0).and(
+             qa.bitwiseAnd(cirrusBitMask).eq(0));
+
+  // Return the masked and scaled data, without the QA bands.
+  return image.updateMask(mask).divide(10000)
+      .select("B.*")
+      .copyProperties(image, ["system:time_start"]);
+}
+
+// Map the function over one year of data and take the median.
+// Load Sentinel-2 TOA reflectance data.
+var S2_col = ee.ImageCollection('COPERNICUS/S2')
+    .filterBounds(geometry)
+    .filterDate('2015-06-23', '2020-06-05')
+    // Pre-filter to get less cloudy granules.
+    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))
+    .map(maskS2clouds);
+
+// Print total Sentinel 2 images employed
+print('Sentinel 2 images', S2_col);
+
+// Select the bands of interest form the Image Collection
+var s2comp = S2_col.select(['B2','B3','B4','B5','B6','B7','B8','B8A','B11','B12'])
+  .mean().clip(geometry);
+
+
+// ////////////////////// COMPOSITE SENTINEL 1 & 2 MEAN BANDS ////////////////////////
+
+// Join the S1 and S2 composites in a single composite.
+var fullComposite = ee.Image([s1comp, s2comp]);
+
+// Reduction in the number of decimal places of the values of the resulting raster
+// This will not reduce noticeably the quality of the data but it will reduce significantly
+// the size of the resulting raster.
+var Composite = ee.Image(0).expression(
+    'round(img * 10000) / 10000', {
+      'img': fullComposite
+    });
+    
+print('Composite:', Composite);
+
+Export.image.toDrive({ // It is also possible to export to Google Drive, just select the option in the dialogue
+  image: fullComposite,
+  description: 'multi_comp1',
+  scale: 10,
+  maxPixels: 1e12,
+  region: geometry
+});
+
+print('Done')

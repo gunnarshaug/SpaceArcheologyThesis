@@ -1,0 +1,157 @@
+
+
+
+// ////////////////////// IMPORT & COMPOSITE SENTINEL 1 COLLECTION ////////////////////////
+
+// Load the Sentinel-1 ImageCollection
+var s1 = ee.ImageCollection('COPERNICUS/S1_GRD')
+  .filterBounds(geometry)
+  .filterDate('2014-10-03', '2020-06-05');
+  
+// Print total Sentinel 1 images employed
+print('Sentinel 1 images:', s1);
+
+// Filter to get images from different look angles
+var asc = s1.filter(ee.Filter.eq('orbitProperties_pass', 'ASCENDING'));
+var desc = s1.filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'));
+var vvvhAsc = asc
+  // Filter to get images with VV and VH single polarization
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))
+  // Filter to get images collected in interferometric wide swath mode.
+  .filter(ee.Filter.eq('instrumentMode', 'IW'));
+var vvvhDesc = desc
+  // Filter to get images with VV and VH dual polarization
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))
+  // Filter to get images collected in interferometric wide swath mode.
+  .filter(ee.Filter.eq('instrumentMode', 'IW'));
+  
+// Create a composite from means at different polarizations and look angles.
+var composite = ee.Image.cat([
+  vvvhAsc.select('VV').median(),
+  vvvhAsc.select('VH').median(),
+  vvvhDesc.select('VV').median(),
+  vvvhDesc.select('VH').median(),
+]).clip(geometry);
+
+// Rename the bands so you can identify them when they are all joined together
+var s1comp = composite.select(
+    ['VV','VH','VV_1','VH_1'], // old names
+    ['s1vva','s1vha','s1vvd','s1vhd'] // new names
+);
+
+
+// ////////////////////// COMPOSITE SENTINEL 1 MEAN BANDS ////////////////////////
+
+var fullComposite = ee.Image([s1comp]);
+
+// Reduction in the number of decimal places of the values of the resulting raster
+// This will not reduce noticeably the quality of the data but it will reduce significantly
+// the size of the resulting raster.
+var Composite = ee.Image(0).expression(
+    'round(img * 10000) / 10000', {
+      'img': fullComposite
+    });
+    
+print('Composite:', Composite);
+
+Map.addLayer(Composite)
+// ////////////////////// MACHINE LEARNING RF CLASSIFIER ////////////////////////
+
+// Call training data for current iteration (in this case iteration 3). The user wanting to
+// generate her/his own training data is prompted to use the geometry imports panel in the map
+// view below to create new feature collections (named 'sites' and 'other' if the user wants to
+// reuse the code below) with a property named 'class' and a value of 1 and 0 respectively.
+// These will be used to identify known sites and all other types of landcover that do not
+// correspond to sites.
+
+
+
+var listOfSites = [ee.Feature(geometry2, {'class': 1}),
+                   ee.Feature(geometry3, {'class': 1}),
+                   ee.Feature(geometry4, {'class': 1}),
+                   ee.Feature(geometry5, {'class': 1}),
+                   ee.Feature(geometry6, {'class': 1}),
+                   ee.Feature(geometry7, {'class': 1}),
+                   ee.Feature(geometry8, {'class': 1}),
+                   ee.Feature(geometry9, {'class': 1}),
+                   ee.Feature(geometry10, {'class': 1}),
+                   ee.Feature(geometry11, {'class': 1}),
+                   ee.Feature(geometry12, {'class': 1}),
+                   ee.Feature(geometry13, {'class': 1}),
+                   ee.Feature(geometry14, {'class': 1}),
+                   ee.Feature(geometry15, {'class': 1}),
+                   ee.Feature(geometry16, {'class': 1}),
+                   ee.Feature(geometry17, {'class': 1}),
+                   ee.Feature(geometry18, {'class': 1}),
+                   ee.Feature(geometry19, {'class': 1}),
+                   ee.Feature(geometry20, {'class': 1}),
+                   ee.Feature(geometry21, {'class': 1}),
+                   ee.Feature(geometry22, {'class': 1}),
+                   ee.Feature(geometry23, {'class': 1})
+];
+var listOfOther = [ee.Feature(geometry24, {'class': 0}),
+                   ee.Feature(geometry25, {'class': 0}),
+                   ee.Feature(geometry26, {'class': 0}),
+                   ee.Feature(geometry27, {'class': 0}),
+                   ee.Feature(geometry28, {'class': 0}),
+                   ee.Feature(geometry29, {'class': 0}),
+                   ee.Feature(geometry30, {'class': 0}),
+                   ee.Feature(geometry31, {'class': 0}),
+                   ee.Feature(geometry32, {'class': 0}),
+                   ee.Feature(geometry33, {'class': 0}),
+                   ee.Feature(geometry34, {'class': 0}),
+                   ee.Feature(geometry35, {'class': 0}),
+                   ee.Feature(geometry36, {'class': 0}),
+                   ee.Feature(geometry38, {'class': 0}),
+                   ee.Feature(geometry39, {'class': 0}),
+                   ee.Feature(geometry40, {'class': 0}),
+                   ee.Feature(geometry41, {'class': 0}),
+                   ee.Feature(geometry42, {'class': 0}),
+                   ee.Feature(geometry43, {'class': 0})
+];
+
+
+var sites = ee.FeatureCollection(listOfSites),
+    other = ee.FeatureCollection(listOfOther);
+
+// Merge training data
+var trn_pols = sites.merge(other);
+print(trn_pols, 'train_pols');
+
+// Create variable for bands
+var bands = ['s1vva','s1vha','s1vvd']; 
+
+// SampleRegions to extract band values for each pixel in each training polygon
+var training = Composite.select(bands).sampleRegions({
+  collection: trn_pols,
+  properties: ['class'],
+  scale: 10
+}); 
+
+// Apply RF classifier calling mode "probability"
+var classifier = ee.Classifier.smileRandomForest({'numberOfTrees':128})
+  .setOutputMode('PROBABILITY').train({
+  features: training,
+  classProperty: 'class',
+  inputProperties: bands
+});
+
+// Create classified probability raster
+var classified = Composite.select(bands).classify(classifier);
+
+// Add the resulting classified layer to the Map Window below
+Map.addLayer(classified, {min: 0.55, max: 1}); // It can take several minutes to load
+
+
+// ////////////////////// EXPORT OF RESULTING DATASETS ////////////////////////
+
+// Data exports as assets so they can be included and visualises in next iterations
+Export.image.toCloudStorage({ // It is also possible to export to Google Drive, just select the option in the dialogue
+  image: classified,
+  description: 'rf128_S1_probability',
+  scale: 10,
+  maxPixels: 1e12,
+  region: geometry
+});

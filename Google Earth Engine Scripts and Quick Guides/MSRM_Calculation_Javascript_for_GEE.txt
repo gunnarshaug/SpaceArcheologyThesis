@@ -1,0 +1,95 @@
+//This Script creates a Multi-Scale Relief model of a Digitial Terrain Model Raw data.
+//Follow Instructions:
+
+// Provide the address of the DTM. Uncomment the DTM line below and selelct to convert to Import Record.
+// The DTM is read from the Assets. Files larger than 10 GB can not be uploaded directly to assets, needs to be uploaded through Google Cloud
+// and imported into assets from there.
+//var DTM = ee.Image('users/fivel1974/Oestfold_2015'); // Use your own DTM here and 
+
+//Run the script so that the raw DTM raster is displayed on the map. The script will fail, because the geometry is not defined.
+Map.addLayer(DTM, {palette: "000000,2207ff,00fff3,03ff00,fbff00,ffc800,ff0000,e300ff,ffffff"}, 'DTM');
+
+//define the geometry using by drawing a polygon within the DTM raster directly on the map. 
+//VERY IMPORTANT: DEFINE THE GEOMETRY TO BE CALCULATED WITHIN THE BOUNDARIES OF THE DTM RASTER.
+//If the geomtry polygon is outside the raw DTM raster the scale of the calculated MSRM raster can become unusable, having very large values when exporting
+//the data outside of GEE. 
+//Rerun the script to calculate the MSRM within the defined geometry. 
+
+
+///////////////////////// MSRM ////////////////////////
+
+var fmax = 20; //the maximum size of the feature you want to detect in meters
+var fminPrmpt = 1; //the minimum size of the feature you want to detect in meters
+var x = 2; //the scaling factor do you want to use
+
+//The following line of code will extract the raster resolution (rr).
+
+var rr = Math.round((DTM.projection().nominalScale().getInfo())*1000) / 1000;
+
+
+// The following lines of code will make sure that a minimum feature size is selected that can be computed by the algorithm
+if (fminPrmpt <= rr) {
+  var fmin = rr;
+} else {
+  var fmin = fminPrmpt;
+}
+
+print('MSRM properties:',
+  'Maximun feature size',fmax,
+  'Minimun feature size',fmin,
+  'Raster resolution',rr,
+  'Scaling factor',x);
+
+var i = Math.floor(Math.pow((fmin-rr)/(2*rr),1/x));
+
+var n = Math.ceil(Math.pow((fmax-rr)/(2*rr),1/x));
+print('Value for i:', i, 'Value for n: ', n, 'Number of relief surfaces to be employed', n-i);
+
+var arrayLP = [];
+
+var LPrs = '';
+
+for (var ndx = i; ndx <= n; ndx++) {
+  var boxcar = ee.Kernel.square({
+  radius: Math.pow(ndx,x), units: 'pixels', normalize: true});
+  var LP = DTM.convolve(boxcar);
+  LPrs = LPrs + '' + Math.pow(ndx,x) + ',';
+  arrayLP.push(LP);
+}
+
+print('Low Pass filter radii to be employed', LPrs);
+
+var compLP = ee.Image([arrayLP]);
+
+var arrayRM = [];
+
+for (var ndx2 = 0; ndx2 < n-i; ndx2++) {
+  var RM = compLP.expression('((b1 - b2))', {
+      'b1': compLP.select(ndx2),
+      'b2': compLP.select(ndx2+1)
+  });
+  arrayRM.push(RM);
+}
+
+var MSRMraw = ee.Image([arrayRM])
+.reduce(ee.Reducer.mean());
+
+var MSRM = ee.Image(0).expression(
+    'round(img * 1000) / 1000', {
+      'img': MSRMraw
+    }).clip(geometry);
+    
+Map.addLayer(MSRM, {palette: "000000,2207ff,00fff3,03ff00,fbff00,ffc800,ff0000,e300ff,ffffff"}, 'MSRM');
+
+
+
+///////////////////////// EXPORT OF RESULTING DATASETS ////////////////////////
+
+// Data exports to Google Cloud but they can also be exported as an asset to be used within GEE or to Google Drive. See the Docs tab fro more information.
+Export.image.toCloudStorage({
+  image: MSRM,
+  description: 'MSRM_Oestfold',
+  scale: DTM,
+  maxPixels: 1e12,
+  region: geometry
+});
