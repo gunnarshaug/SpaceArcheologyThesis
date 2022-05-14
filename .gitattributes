@@ -1,1 +1,14 @@
 *.pt filter=lfs diff=lfs merge=lfs -text
+*.tif filter=lfs diff=lfs merge=lfs -text
+
+**/Rogaland_2016_Composite_Slope.png filter=lfs diff=lfs merge=lfs -text
+**/Rogaland_2016_Composite_SLRM.png filter=lfs diff=lfs merge=lfs -text
+**/Composite_SLRM_Results_without_Overlap_400.png filter=lfs diff=lfs merge=lfs -text
+**/Composite_SLRM_Results_without_Overlap_200.png filter=lfs diff=lfs merge=lfs -text
+**/Composite_SLRM_Results_without_Overlap_600.png filter=lfs diff=lfs merge=lfs -text
+**/Composite_Slope_Results_without_Overlap_400.png filter=lfs diff=lfs merge=lfs -text
+**/Composite_Slope_Results_with_Overlap_400.png filter=lfs diff=lfs merge=lfs -text
+**/Composite_Slope_Results_without_Overlap_200.png filter=lfs diff=lfs merge=lfs -text
+**/Composite_Slope_Results_with_Overlap_200.png filter=lfs diff=lfs merge=lfs -text
+**/Composite_Slope_Results_without_Overlap_600.png filter=lfs diff=lfs merge=lfs -text
+**/composite.png filter=lfs diff=lfs merge=lfs -text
