@@ -3,6 +3,8 @@
 *.db
 
 venv
-**/storage/analyzed
-**/storage/images
-**/storage/temp
+**/storage/analyzed/*
+**/storage/images/*
+**/storage/temp/*
+
+!.gitkeep
