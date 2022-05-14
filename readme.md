@@ -1,5 +1,5 @@
 # Github Repository Important Information
-This repository contains several large files, requiring Git LFS support. 
+This repository contains several large files, requiring [Git LFS](https://git-lfs.github.com/) support. 
 Make sure that Git LFS is installed before cloning the repository.
 To clone the repository use the "git lfs clone" command and not just "git clone".
 
@@ -45,15 +45,21 @@ To run the project locally:
 flask run
 ```
 
-## Use of App
+## Application Usage
 
-```bash
-to be added
-```
+Slope, SLRM, MSRM models are for detection of burial mounds. 
 
+SAR model is for detection of settlement mounds.
+
+Filtering of the results is meant for burial mound data only.
+
+<img width="1541" alt="image" src="https://user-images.githubusercontent.com/23264453/168439309-69980503-fe40-40fb-be9d-81b5a3cc13d5.png">
+
+- Select model results to filter
+- Upon multiple result selection in filtering, results are being cross filtered with the respect to the initially selected model.
 ## Available Test Data for App
 
-```bash
+
 The repository Dataset folder contains all data sets used for input to train models. 
 The Burial Mound Data Norway and SAR Data Central Asia has data files for the test areas used in the thesis.
 Each Test Area folder contains png files which can be used for testing the App. 
@@ -68,11 +74,10 @@ Test Area Coordinates to Use:
 - Bukhara Test Area Coordinates - WGS1984:  West: 64.3206 North: 40.2453
 - Kandahar Test Area Coordinates - WGS1984:  West: 65.188 North: 31.6807
 - Klepp Test Area Coordinates - UTM32V: West: 304345 North: 6520226
-```
 
-##Creating ESRI Shape Files in ArcGIS Pro and QGIS
 
-```bash
+## Creating ESRI Shape Files in ArcGIS Pro and QGIS
+
 The repository contains python scripts for creating ESRI shapefiles in QGIS, and also
 Jupyter notebooks for creating the ESRI shapefiles in ArcGIS Pro.
 Each has two versions. 
@@ -98,11 +103,8 @@ QGIS:
 - Run the script. 
 
 
-```
-
 ## Google Earth Engine
 
-```bash
 This repository has a folder called "Google Earth Engine Scripts and Quick Guides", which contains several Javascripts for use in the Google Earth Engine Code Editor.
 Each java script has descriptions on how to use them. All scripts create GeoTiff files which can be exported to Google Drive or Google Cloud.
 Scripts requiring input rasters not available through Google Earth Engine must be uploaded. Should the size be above 10 GB, a Google Cloud acount is needed. 
@@ -111,17 +113,15 @@ A PDF called "Using Google Earth Engine to Create Multi-Band Sentinel-1 and 2 Co
 To create GeoTiff files of SAR data as used in this thesis, the "Sentinel-1_SAR_Multitemporal_Composite_Javascript_for_GEE" code should be used.
 Scripts available:
 
--Multitemporal_14band_Sentinel_Composite_Javascript_for_GEE - Creates a 14 band composite of Sentinel-1 SAR data and Sentinel-2 multi-spectral data.
--Sentinel-1_SAR_Multitemporal_Composite_Javascript_for_GEE - Creates a 4-band composite of Sentinel-1 SAR data. VV and VH Polarization in both ascending and descending mode.
--Sentinel-2_Multispectral_Multitemporal_Composite_Javascript_for_GEE - Creates a 10 band composite of multi-spectral Sentinel-2 data.
--MSRM_Calculation_Javascript_for_GEE - Calculates Multi-Scale Relief Model GeoTiff from DTM Geotiff data. DTM data must be uploaded to GEE. See "Calculation of MSRM of DTM Data in GEE.pdf" for more details.
--Random_Forrest_SAR_Javascipt_for_GEE - Calculates a Random Forrest probability map GeoTiff from Sentinel-1 SAR data. User must specify geometries for features to look for and other features. 
-```
+- Multitemporal_14band_Sentinel_Composite_Javascript_for_GEE - Creates a 14 band composite of Sentinel-1 SAR data and Sentinel-2 multi-spectral data.
+- Sentinel-1_SAR_Multitemporal_Composite_Javascript_for_GEE - Creates a 4-band composite of Sentinel-1 SAR data. VV and VH Polarization in both ascending and descending mode.
+- Sentinel-2_Multispectral_Multitemporal_Composite_Javascript_for_GEE - Creates a 10 band composite of multi-spectral Sentinel-2 data.
+- MSRM_Calculation_Javascript_for_GEE - Calculates Multi-Scale Relief Model GeoTiff from DTM Geotiff data. DTM data must be uploaded to GEE. See "Calculation of MSRM of DTM Data in GEE.pdf" for more details.
+- Random_Forrest_SAR_Javascipt_for_GEE - Calculates a Random Forrest probability map GeoTiff from Sentinel-1 SAR data. User must specify geometries for features to look for and other features. 
 
-##ArcGIS Pro Information and DTM Data Download
+## ArcGIS Pro Information and DTM Data Download
 
-```bash
+
 LiDAR based Digital Terrain Models used in this thesis was downloaded from Hoydedata.no.
 The ArcGIS Info folder in this repository contains a PDF file called "Norwegian LiDAR DTM Data – Acquiring and Setting Up Data in ArcGIS Pro",
 which describes how to download and add the DTM data to an ArcGIS Pro project. How to create a Slope display and Simple Local Relief Model display is also explained. 
-```
