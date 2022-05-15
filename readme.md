@@ -62,11 +62,10 @@ Filtering of the results is meant for burial mound data only.
 
 The repository Dataset folder contains all data sets used for input to train models. 
 The Burial Mound Data Norway and SAR Data Central Asia has data files for the test areas used in the thesis.
-Each Test Area folder contains png files which can be used for testing the App. 
+Each Test Area folder contains png files which can be used for testing the App and a GeoTiff file for use in GIS software. 
 For SAR data there are two test areas. For burial mound data there is one test area with a png file for each type of relief model.
-Ground truth Esri shapefiles for the burial and settlement mounds can also be found in the results and test area folders,
-and can be used in ArcGIS Pro. 
-(An ESRI shapefile is actually several different files, including the projection used for the shapes).
+Ground truth Esri shapefiles for the burial and settlement mounds can also be found in the test area and results folders respectively,
+and can be used in ArcGIS Pro. The ground truth shapefiles for settlement mounds are split into likelihood of detection.
 
 The App uses the coordinates for the top lef corner of each test png image to calculate result files with coordinates.
 Test Area Coordinates to Use:
