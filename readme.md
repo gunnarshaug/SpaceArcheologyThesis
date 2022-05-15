@@ -91,14 +91,14 @@ ArcGIS Pro:
 
 - Place the Jupyter notebook in the ArcGIS Pro project.
 - Open the Jupyter notebook from ArcGIS Pro Catalogue pane.
-- Edit the input file and output file parameters. 
+- Edit the input file and output file parameters in the notebook. 
 - Run the notebook. 
 
 QGIS:
 
 - Open the Python interface.
 - Load the script file.
-- Edit the input file and output file parameters.
+- Edit the input file and output file parameters in the script.
 - Run the script. 
 
 
