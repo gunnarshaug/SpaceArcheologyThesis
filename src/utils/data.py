@@ -1,13 +1,14 @@
+import os
+import cv2
+# import matplotlib.pyplot as plt
+import torch
 import numpy as np
 import pandas as pd
-import cv2
-import torch
-import torch
-from torch.utils.data import Dataset
-import numpy as np
-import os
+import albumentations as a
+import utils.util
+import albumentations.pytorch.transforms
 
-class Mound(Dataset):
+class Mound(torch.utils.data.Dataset):
     def __init__(self, annotations_file, img_dir, transform=None):
         self.bounding_boxes  = pd.read_csv(annotations_file)
 
@@ -80,3 +81,48 @@ class Mound(Dataset):
       target["iscrowd"] = iscrowd
 
       return image, target
+
+def create_dataloader(config, is_train=True):
+  base_path = config.dataset.path.base
+  transform = a.Compose([
+      a.Resize(
+        config.dataset.transform.width, 
+        config.dataset.transform.width
+      ),
+      a.HorizontalFlip(p=0.5),
+      a.RandomBrightnessContrast(p=0.2),
+      a.Normalize(
+          mean=[0.485, 0.456, 0.406],
+          std=[0.229, 0.224, 0.225]
+      ),
+      albumentations.pytorch.transforms.ToTensorV2()
+  ], bbox_params=a.BboxParams(format='pascal_voc', label_fields=['class_labels']))
+  if is_train:
+      dataset = Mound(
+        os.path.join(base_path, config.dataset.path.train.labels),
+        os.path.join(base_path, config.dataset.path.train.images),
+        transform
+      )
+  else:
+      dataset = Mound(
+        os.path.join(base_path, config.dataset.path.val.labels),
+        os.path.join(base_path, config.dataset.path.val.images),
+        transform
+      )
+
+  return torch.utils.data.DataLoader(
+      dataset,
+      batch_size=config.train.batch_size,
+      num_workers=config.dataset.loader.num_workers,
+      collate_fn=utils.util.collate_fn
+  )
+
+
+def make_optimizer(config, model):
+  params = [p for p in model.parameters() if p.requires_grad]
+  return torch.optim.SGD(
+      params, 
+      lr = config.train.optimizer.initial_lr,
+      momentum=config.train.optimizer.stg.momentum,
+      weight_decay= config.train.optimizer.stg.weight_decay
+    )

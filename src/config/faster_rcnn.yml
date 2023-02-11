@@ -1,0 +1,40 @@
+dataset:
+  path: 
+    base: ./datasets/slope
+    train: 
+      images: train/data
+      labels: train/classification.csv
+    val: 
+      images: val/data
+      labels: val/classification.csv
+    test: 
+      images: test/data
+      labels: test/classification.csv
+  loader:
+    num_workers: 4
+  transform: 
+    width: 224
+    height: 224
+
+train:
+  batch_size: 10
+  epochs: 120
+
+  optimizer: 
+    initial_lr: 0.005
+    stg:
+      momentum: 0.9
+      weight_decay: 0.0005
+      lr_scheduler:
+        step_size: 30
+        gamma: 0.1
+
+test:
+  batch_size: 1000
+  epochs: 120
+
+model:
+  classes: 2 # one class for the background and one for burial mounds
+  path: ./models/slope/
+  name: "slope.pt"
+
