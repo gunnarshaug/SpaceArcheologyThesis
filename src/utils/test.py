@@ -29,18 +29,18 @@ transform = a.Compose([
 ])
 
 def write_results_summary_csv(path, num_test_images, true_positives, false_positives, false_negatives, learning_rate, num_epoch, result_filename):
-    with open(os.path.join(path, result_filename + ".csv"), "w", newline='') as write_obj:
-      csv_writer = csv.writer(write_obj)
-      csv_writer.writerow([f"# of Test Images: {num_test_images} "])
-      csv_writer.writerow([f"# of True Positives: {true_positives}"])
-      csv_writer.writerow([f"# of False Positives: {false_positives}"])
-      csv_writer.writerow([f"# of False Negatives: {false_negatives}"])
-      csv_writer.writerow([f"Precision: {true_positives/(true_positives+false_positives)}"])
-      csv_writer.writerow([f"Recall: {true_positives/(true_positives+false_negatives)}"])
-      csv_writer.writerow("")
-      csv_writer.writerow(["Model Settings:"])
-      csv_writer.writerow([f"# of Epochs: {num_epoch}"])
-      csv_writer.writerow([f"Learning Rate: {learning_rate}"])
+  with open(os.path.join(path, result_filename + ".csv"), "w", newline='') as write_obj:
+    csv_writer = csv.writer(write_obj)
+    csv_writer.writerow([f"# of Test Images: {num_test_images} "])
+    csv_writer.writerow([f"# of True Positives: {true_positives}"])
+    csv_writer.writerow([f"# of False Positives: {false_positives}"])
+    csv_writer.writerow([f"# of False Negatives: {false_negatives}"])
+    csv_writer.writerow([f"Precision: {true_positives/(true_positives+false_positives)}"])
+    csv_writer.writerow([f"Recall: {true_positives/(true_positives+false_negatives)}"])
+    csv_writer.writerow("")
+    csv_writer.writerow(["Model Settings:"])
+    csv_writer.writerow([f"# of Epochs: {num_epoch}"])
+    csv_writer.writerow([f"Learning Rate: {learning_rate}"])
 
 
 

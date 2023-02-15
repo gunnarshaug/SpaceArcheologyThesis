@@ -5,7 +5,6 @@ import utils.config
 import utils.data
 import utils.test
 import utils.metrics
-import utils.util
 import utils.model
 
 def train(args, model, device, train_loader, optimizer, epoch):
@@ -13,51 +12,51 @@ def train(args, model, device, train_loader, optimizer, epoch):
   loss_hist.reset()
   model.train()
   for batch_idx, (data, target) in enumerate(train_loader):
-      # data, target = data.to(device), target.to(device)
-      images = list(image.to(device) for image in data)
-      targets = [{k: v.to(device) for k, v in t.items()} for t in target]
-      print("targets: {}".format(targets))
+    # data, target = data.to(device), target.to(device)
+    images = list(image.to(device) for image in data)
+    targets = [{k: v.to(device) for k, v in t.items()} for t in target]
+    print("targets: {}".format(targets))
 
-      # output = model(data, target)
-      output = model(images, targets)
-      losses = sum(loss for loss in output.values())
-      loss_value = losses.item()
+    # output = model(data, target)
+    output = model(images, targets)
+    losses = sum(loss for loss in output.values())
+    loss_value = losses.item()
 
-      loss_hist.send(loss_value)
+    loss_hist.send(loss_value)
 
-      optimizer.zero_grad()
-      losses.backward()
-      optimizer.step()
+    optimizer.zero_grad()
+    losses.backward()
+    optimizer.step()
 
-      print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-          epoch, batch_idx * len(data), len(train_loader.dataset),
-          100. * batch_idx / len(train_loader), loss_value))
-      # if batch_idx % args.log_interval == 0:
-          # print("Loss: ", loss_hist.value)  
+    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+        epoch, batch_idx * len(data), len(train_loader.dataset),
+        100. * batch_idx / len(train_loader), loss_value))
+    # if batch_idx % args.log_interval == 0:
+        # print("Loss: ", loss_hist.value)  
 
 
 def validate(model, device, val_loader):
-    model.eval() 
-    stats = utils.metrics.Stats()
-    with torch.no_grad():
-      for images, targets in val_loader:
-        images = list(image.to(device) for image in images)
-        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-        output = model(images)
-        for i, result in enumerate(output):
-          nms_prediction = utils.test.apply_nms(output[i], iou_thresh=0.1)
-          ground_truth = targets[i]
-          iou = torchvision.ops.box_iou(nms_prediction['boxes'].to(device), ground_truth['boxes'].to(device))
-          predicted_boxes_count, gt_boxes_count = list(iou.size())
+  model.eval() 
+  stats = utils.metrics.Stats()
+  with torch.no_grad():
+    for images, targets in val_loader:
+      images = list(image.to(device) for image in images)
+      targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+      output = model(images)
+      for i, result in enumerate(output):
+        nms_prediction = utils.test.apply_nms(output[i], iou_thresh=0.1)
+        ground_truth = targets[i]
+        iou = torchvision.ops.box_iou(nms_prediction['boxes'].to(device), ground_truth['boxes'].to(device))
+        predicted_boxes_count, gt_boxes_count = list(iou.size())
 
-          if predicted_boxes_count == 0 and gt_boxes_count == 0:
-            continue
-          
-          tp, fp, fn = utils.metrics.compute_accuracy(iou)
-          stats.send(tp, fp, fn)
+        if predicted_boxes_count == 0 and gt_boxes_count == 0:
+          continue
+        
+        tp, fp, fn = utils.metrics.compute_accuracy(iou)
+        stats.send(tp, fp, fn)
 
-    print('\nTest set: Precision: {},\t Recall: {}\n'.format(
-        stats.get_precision(), stats.get_recall()))
+  print('\nTest set: Precision: {},\t Recall: {}\n'.format(
+      stats.get_precision(), stats.get_recall()))
 
 
 def parse_args(config):
@@ -133,6 +132,6 @@ def main():
     torch.save(model.state_dict(),config.model.name)
 
 if __name__ == "__main__":
-    print(torch.cuda.is_available())
-  
-    main()
+  print(torch.cuda.is_available())
+
+  main()

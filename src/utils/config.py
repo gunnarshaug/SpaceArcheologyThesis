@@ -9,13 +9,23 @@ class Dict:
             else:
                 self.__dict__[key] = value
 
-def load(config_path):
-    with open(config_path) as file:
-        config = yaml.safe_load(file)
-        print(config)
-    config = Dict(**config)
-    return config
+def _get_path(relative_path):
+    current_path = os.path.realpath(__file__)
+    path = os.path.join(current_path,"..", "..", "..", relative_path)
+    return os.path.abspath(path)
+
+def load(config_path, is_absolute=False):
+    if is_absolute == False:
+        config_path = _get_path(config_path)
+    print(config_path)
+    try:            
+        with open(config_path) as file:
+            config = yaml.safe_load(file)
+            print(config)
+    except FileNotFoundError:
+        raise
+    return Dict(**config)
 
 if __name__ == "__main__":
-    # print(os.path.abspath(CONFIG_PATH))
-    cnf = load("faster_rcnn.yaml")
+    cnf = load("config/faster_rcnn.yml")
+
