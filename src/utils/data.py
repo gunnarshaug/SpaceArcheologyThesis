@@ -84,28 +84,31 @@ class Mound(torch.utils.data.Dataset):
     return image, target
 
 
-def create_dataloader(config, is_train=True):
-  path = config.dataset.path
+def create_dataloader(config, mode="train"):
+    path = config.dataset.path
+    if mode == "train":
+        data_path = config.dataset.path.train
+        transform = get_train_transform(config.dataset.transform)
+    if mode == "val":
+        data_path = config.dataset.path.test
+        transform = get_test_transform(config.dataset.transform)
 
-  if is_train:
-      dataset = Mound(
-          os.path.join(path.base, path.train.labels),
-          os.path.join(path.base, path.train.images),
-          get_train_transform(config.dataset.transform)
-      )
-  else:
-      dataset = Mound(
-          os.path.join(path.base, path.val.labels),
-          os.path.join(path.base, path.val.images),
-          get_test_transform(config.dataset.transform)
-      )
+    if mode == "test":
+        data_path = config.dataset.path.test
+        transform = get_test_transform(config.dataset.transform)
 
-  return torch.utils.data.DataLoader(
-      dataset,
-      batch_size=config.train.batch_size,
-      num_workers=config.dataset.loader.num_workers,
-      collate_fn=collate_fn
-  )
+    dataset = Mound(
+        os.path.join(path.base, data_path.labels),
+        os.path.join(path.base, data_path.images),
+        transform
+    )
+
+    return torch.utils.data.DataLoader(
+        dataset,
+        batch_size=config.train.batch_size,
+        num_workers=config.dataset.loader.num_workers,
+        collate_fn=collate_fn
+    )
 
 def get_train_transform(dimensions):
   return a.Compose([
@@ -135,15 +138,6 @@ def get_test_transform(dimensions):
       albumentations.pytorch.transforms.ToTensorV2()
   ], bbox_params=a.BboxParams(format='pascal_voc', label_fields=['class_labels']))
 
-def make_optimizer(config, model):
-  params = [p for p in model.parameters() if p.requires_grad]
-  return torch.optim.SGD(
-      params,
-      lr=config.train.optimizer.initial_lr,
-      momentum=config.train.optimizer.stg.momentum,
-      weight_decay=config.train.optimizer.stg.weight_decay
-  )
-
 def collate_fn(batch):
     """
     copy from https://github.com/pytorch/vision/blob/main/references/detection/utils.py
@@ -152,9 +146,9 @@ def collate_fn(batch):
 
 
 # if __name__ == "__main__":
-#     import config
+#     import utils.cnf
 #     import matplotlib.pyplot as plt
-#     cnf = config.load("config/faster_rcnn.yml")
+#     cnf = utils.cnf.load("config/faster_rcnn.yml")
 #     dataloader = create_dataloader(cnf, True)
 #     features, labels = next(iter(dataloader))
 #     # print(features, labels)

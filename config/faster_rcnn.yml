@@ -21,11 +21,11 @@ train:
   epochs: 120
 
   optimizer: 
-    initial_lr: 0.005
+    lr: 0.005
     stg:
       momentum: 0.9
       weight_decay: 0.0005
-      lr_scheduler:
+      scheduler:
         step_size: 30
         gamma: 0.1
 
