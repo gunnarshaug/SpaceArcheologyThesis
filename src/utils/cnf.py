@@ -23,5 +23,3 @@ def load_cnf(config_path, is_absolute=False):
         print(config)
 
     return Dict(**config)
-
-load_cnf("t.cnf")
