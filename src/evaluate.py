@@ -57,12 +57,21 @@ def parse_args():
   return parser.parse_args()
 
 
-if __name__ == "__main__":
+def main():
   args = parse_args()
   config = utils.cnf.load_cnf(args.config)
   test_loader = utils.data.create_dataloader(config, "test")
   model_path = os.path.join(config.model.path, config.model.name)
-  print(model_path)
-  model = torch.load(model_path)
-  evaluate(model, test_loader)
 
+  use_cuda = torch.cuda.is_available()
+  device = torch.device("cuda" if use_cuda else "cpu")
+
+  model = torch.load(model_path)
+  model.to(device)
+
+
+  evaluate(config, model, device,test_loader)
+
+
+if __name__ == "__main__":
+  main()

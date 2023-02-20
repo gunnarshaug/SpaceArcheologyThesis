@@ -130,12 +130,8 @@ def main():
 
     path = os.path.join(config.model.path, config.model.name)
     torch.save(model,path)
-    # st_path = os.path.join(config.model.path, "st_" + config.model.name)
-    # torch.save(model.state_dict(), st_path)
 
 if __name__ == "__main__":
   print(torch.cuda.is_available())
   main()
-  # model = m.fasterrcnn_resnet50_fpn(weights=m.FasterRCNN_ResNet50_FPN_Weights.DEFAULT)
-  # model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
 
