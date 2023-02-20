@@ -8,6 +8,6 @@
 # Activate environment
 uenv verbose cuda-11.4 cudnn-11.4-8.2.4
 uenv miniconda-python39
-conda activate pytorch_ml_env
+conda activate pytorch_env
 # Run the Python script that uses the GPU
 python -u src/train.py

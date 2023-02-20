@@ -72,7 +72,7 @@ def parse_args():
                       help='how many batches to wait before logging training status')
   parser.add_argument('--save-model', action='store_true', default=True,
                       help='For Saving the current Model')
-  parser.add_argument('--cfg', dest='cfg_file',
+  parser.add_argument('--config',
                       help='location of config file',
                       default='config/faster_rcnn.yml', type=str)
   return parser.parse_args()
@@ -84,7 +84,7 @@ def get_object_detection_model():
 def main():
   args = parse_args()
   try:
-    config = utils.cnf.load_cnf(args.cnf)
+    config = utils.cnf.load_cnf(args.config)
   except FileNotFoundError as ex:
     print(ex.strerror, ex.filename)
     return
