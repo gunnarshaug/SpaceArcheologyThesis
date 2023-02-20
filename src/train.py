@@ -1,11 +1,12 @@
 import torchvision
+import torchvision.models.detection as m
 import argparse
 import torch
 import os
-import torchvision.models.detection as m
 import utils.metrics
 import utils.cnf
 import utils.data
+import utils.general
 import matplotlib as plt
 
 def train(args, model, device, train_loader, optimizer, epoch):
@@ -47,7 +48,7 @@ def validate(model, device, val_loader):
       targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
       output = model(images)
       for i, result in enumerate(output):
-        nms_prediction = utils.test.apply_nms(output[i], iou_thresh=0.1)
+        nms_prediction = utils.general.apply_nms(output[i], iou_thresh=0.1)
         ground_truth = targets[i]
         iou = torchvision.ops.box_iou(nms_prediction['boxes'].to(device), ground_truth['boxes'].to(device))
         predicted_boxes_count, gt_boxes_count = list(iou.size())
@@ -77,9 +78,6 @@ def parse_args():
                       default='config/faster_rcnn.yml', type=str)
   return parser.parse_args()
 
-def get_object_detection_model():
-    model = m.fasterrcnn_resnet50_fpn(weights=m.FasterRCNN_ResNet50_FPN_Weights.DEFAULT)
-    return model
 
 def main():
   args = parse_args()
@@ -98,7 +96,8 @@ def main():
   train_loader = utils.data.create_dataloader(config, "train")
   val_loader = utils.data.create_dataloader(config, "val")
 
-  model = get_object_detection_model()
+  model = m.fasterrcnn_resnet50_fpn(weights=m.FasterRCNN_ResNet50_FPN_Weights.DEFAULT)
+
   model.to(device)
   
   optimizer = torch.optim.SGD(
@@ -136,4 +135,7 @@ def main():
 
 if __name__ == "__main__":
   print(torch.cuda.is_available())
-  main()
+  # main()
+  # model = m.fasterrcnn_resnet50_fpn(weights=m.FasterRCNN_ResNet50_FPN_Weights.DEFAULT)
+  # model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+
