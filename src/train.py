@@ -7,7 +7,7 @@ import utils.metrics
 import utils.cnf
 import utils.data
 import utils.general
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 def train(args, model, device, train_loader, optimizer, epoch):
   loss_hist = utils.metrics.Averager()
@@ -135,7 +135,7 @@ def main():
 
 if __name__ == "__main__":
   print(torch.cuda.is_available())
-  # main()
+  main()
   # model = m.fasterrcnn_resnet50_fpn(weights=m.FasterRCNN_ResNet50_FPN_Weights.DEFAULT)
   # model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
 

@@ -1,10 +1,8 @@
-import torchvision
-import utils.not_used
+import os
 import torchvision
 import argparse
 import utils.cnf
 import utils.general
-import os
 import torch
 import utils.data
 import utils.metrics
@@ -50,8 +48,8 @@ def parse_args():
   parser.add_argument('--dataset', dest='dataset',
                       help='test dataset',
                       default='datasets/slope/test', type=str)
-  parser.add_argument('--cfg', dest='cfg_file',
-                      help='optional config file',
+  parser.add_argument('--config', 
+                      help='config file path',
                       default='config/faster_rcnn.yml', type=str)
   parser.add_argument('--model',
                       help='path to model',
@@ -60,10 +58,11 @@ def parse_args():
 
 
 if __name__ == "__main__":
-  config = utils.cnf.load("config/faster_rcnn.yml")
   args = parse_args()
+  config = utils.cnf.load_cnf(args.config)
   test_loader = utils.data.create_dataloader(config, "test")
   model_path = os.path.join(config.model.path, config.model.name)
+  print(model_path)
   model = torch.load(model_path)
   evaluate(model, test_loader)
 
