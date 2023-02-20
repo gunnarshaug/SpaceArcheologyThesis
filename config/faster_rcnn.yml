@@ -18,7 +18,7 @@ dataset:
 
 train:
   batch_size: 10
-  epochs: 120
+  epochs: 10
 
   optimizer: 
     lr: 0.005

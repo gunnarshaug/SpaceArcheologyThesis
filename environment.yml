@@ -1,4 +1,4 @@
-name: pytorch_env
+name: pytorch_ml_env
 channels:
   - pytorch # for pytorch and torchvision.
   - conda-forge
