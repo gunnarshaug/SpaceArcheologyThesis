@@ -22,12 +22,11 @@ train:
 
   optimizer: 
     lr: 0.005
-    stg:
-      momentum: 0.9
-      weight_decay: 0.0005
-      scheduler:
-        step_size: 30
-        gamma: 0.1
+    momentum: 0.9
+    weight_decay: 0.0005
+  scheduler:
+    step_size: 30
+    gamma: 0.1
 
 test:
   batch_size: 1000
@@ -36,5 +35,5 @@ test:
 model:
   classes: 2 # one class for the background and one for burial mounds
   path: ./models/slope/
-  name: "slope.pt"
+  name: "Slope_RGB_Fixed_Val_Add_Augm"
 
