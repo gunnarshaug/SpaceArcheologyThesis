@@ -55,20 +55,3 @@ class Averager:
     self.current_total = 0.0
     self.iterations = 0.0
 
-def compute_accuracy(iou):
-  predicted_boxes_count, gt_boxes_count = list(iou.size())
-    
-  fp = 0
-  tp = 0
-
-  for box in iou:
-    valid_hits = [i for i, x in enumerate(box) if x > 0.5 ]
-    if len(valid_hits) == 0:
-      fp = fp + 1
-      continue
-    tp = tp + 1
-    
-
-  fn = gt_boxes_count - tp
-  return tp, fp, fn
-

@@ -85,11 +85,6 @@ def main():
     
     print('\nTest set: Precision: {},\t Recall: {}\n'.format(
         val_stats.get_precision(), val_stats.get_recall()))
-    
-  # tb_writer.add_scalars("Training vs Validation Loss",
-  #                    {"Training" : avg_loss}, 
-  #                    {"Validation": avg_vloss},
-  #                    epoch)
 
   if (args.save_model):
     print("saving model..")
@@ -104,8 +99,8 @@ def main():
   test_loader = utils.data.get_dataloader(config, "test")
   test_stats = utils.metrics.Stats()
   utils.model.test(config, model, device, test_loader, test_stats, tb_writer)
-  tb_writer.add_scalar('Precision/test', test_stats.get_precision())
-  tb_writer.add_scalar('Recall/test', test_stats.get_recall())
+  # tb_writer.add_scalar('Precision/test', test_stats.get_precision())
+  # tb_writer.add_scalar('Recall/test', test_stats.get_recall())
 
   tb_writer.flush()
   tb_writer.close()
@@ -113,4 +108,3 @@ def main():
 if __name__ == "__main__":
   print(torch.cuda.is_available())
   main()
-

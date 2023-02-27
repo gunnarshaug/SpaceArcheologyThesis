@@ -2,15 +2,12 @@ import csv
 import os
 import torchvision
 import torch
-import utils.metrics
-import utils.data
-import utils.general
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 
-def get_pretrained_frcnn(num_classes):
-  # model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
-  model = torchvision.models.detection.fasterrcnn_resnet50_fpn(weights="DEFAULT")
+def get_pretrained_frcnn(num_classes=2):
+  model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+  # model = torchvision.models.detection.fasterrcnn_resnet50_fpn(weights="DEFAULT")
   in_features = model.roi_heads.box_predictor.cls_score.in_features
   model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
   return model
@@ -54,7 +51,7 @@ def validate(model, device, val_loader, stats):
         if predicted_boxes_count == 0 and gt_boxes_count == 0:
           continue
         
-        tp, fp, fn = utils.metrics.compute_accuracy(iou)
+        tp, fp, fn = _compute_accuracy(iou)
         stats.update(tp, fp, fn)
   
 def test(config, model, device, loader, stats, tb_writer):
@@ -72,12 +69,12 @@ def test(config, model, device, loader, stats, tb_writer):
         ground_truth['boxes'].to(device)
       )
 
-      tp, fp, fn = utils.metrics.compute_accuracy(iou)
+      tp, fp, fn = _compute_accuracy(iou)
       stats.update(tp, fp, fn)
 
       if(idx == 0 and i == 0):
-        # tb_writer.add_image_with_boxes("Fist Image", images[0], targets[0])
-        tb_writer.add_image_with_boxes("Fist Image", images[0], iou)
+        tb_writer.add_image_with_boxes("Fist Image Prediction", images[0], nms_prediction['boxes'])
+        tb_writer.add_image_with_boxes("Fist Image Ground Truth", images[0], ground_truth['boxes'])
 
   print("For total of ", stats.counter, " images the results are following:")
   print("True positives: ", stats.get_true_positives())
@@ -121,3 +118,20 @@ def _write_results_summary_csv(path, num_test_images, true_positives, false_posi
     csv_writer.writerow(["Model Settings:"])
     csv_writer.writerow([f"# of Epochs: {num_epoch}"])
     csv_writer.writerow([f"Learning Rate: {learning_rate}"])
+
+def _compute_accuracy(iou):
+  predicted_boxes_count, gt_boxes_count = list(iou.size())
+    
+  fp = 0
+  tp = 0
+
+  for box in iou:
+    valid_hits = [i for i, x in enumerate(box) if x > 0.5 ]
+    if len(valid_hits) == 0:
+      fp = fp + 1
+      continue
+    tp = tp + 1
+    
+
+  fn = gt_boxes_count - tp
+  return tp, fp, fn
