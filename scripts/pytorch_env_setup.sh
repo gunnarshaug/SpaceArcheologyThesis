@@ -8,5 +8,5 @@
 # Set up environment
 uenv verbose cuda-11.4 cudnn-11.4-8.2.4
 uenv miniconda-python39
-conda env create --file environment.yml
-# conda create -n pytorch_env -c pytorch pytorch torchvision numpy -c conda-forge albumannotations matplotlib pandas opencv_python PyYAML -y
+# conda env create --file environment.yml
+conda create -n pytorch_env -c pytorch -c conda-forge pytorch torchvision pandas opencv pillow numpy albumentations tensorboard pyyaml -y
