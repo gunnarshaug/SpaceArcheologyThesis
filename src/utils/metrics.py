@@ -5,7 +5,7 @@ class Stats:
       self.fn = 0
       self.counter = 0
 
-  def send(self, tp, fp, fn):
+  def update(self, tp, fp, fn):
       self.tp += tp
       self.fp += fp
       self.fn += fn
@@ -40,7 +40,7 @@ class Averager:
     self.current_total = 0.0
     self.iterations = 0.0
 
-  def send(self, value):
+  def update(self, value):
     self.current_total += value
     self.iterations += 1
 

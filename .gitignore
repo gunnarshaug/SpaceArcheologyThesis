@@ -1,4 +1,6 @@
 datasets/
+models/
+tensorboard/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
