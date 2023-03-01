@@ -5,16 +5,16 @@ channels:
 dependencies:
   - python=3.9
   - cudatoolkit=11.4
-  - cudnn=8.2.4
-  - pip
-  - pip:
-    - torch==1.10.1
-    - torchvision==0.11.2
-    - opencv-python==4.5.5.62
-    - numpy==1.20.3
-    - albumentations==1.1.0
-    - Pillow==8.3.1
-    - tensorboard==2.6.0
-    - pandas==1.3.4
-    - pyyaml==6.0
-
+  - pytorch
+  - torchvision
+  - albumentations
+  - matplotlib
+  - tensorboard
+  - pyyaml
+  - pandas
+  - numpy
+  - pillow
+  - opencv
+  # - pip
+  # - pip:
+  #   - opencv-python
