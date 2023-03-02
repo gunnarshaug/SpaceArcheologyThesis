@@ -79,11 +79,11 @@ def main():
     tb_writer.add_scalar('Loss/train', 
                           train_loss.value, 
                           epoch)
-    tb_writer.add_scalar('Precision/train', val_stats.get_precision())
-    tb_writer.add_scalar('Recall/train', val_stats.get_recall())
+    tb_writer.add_scalar('Precision/train', val_stats.get_precision(), epoch)
+    tb_writer.add_scalar('Recall/train', val_stats.get_recall(), epoch)
     tb_writer.flush()
 
-    print('Train Epoch: {}\tLoss: {:.6f}'.format(
+    print('Train Epoch: {}\tLoss: {}'.format(
         epoch, 
         train_loss.value))
     
