@@ -73,7 +73,7 @@ def main():
   for epoch in range(1, config.train.epochs + 1):
     train_loss.reset()
     utils.model.train_one_epoch(model, device, train_loader, optimizer, train_loss)
-    # scheduler.step()
+    scheduler.step()
     utils.model.validate(model, device, val_loader, val_stats)
 
     tb_writer.add_scalar('Loss/train', 
@@ -83,9 +83,8 @@ def main():
     tb_writer.add_scalar('Recall/train', val_stats.get_recall())
     tb_writer.flush()
 
-    print('Train Epoch: {} [({:.0f}%)]\tLoss: {:.6f}'.format(
+    print('Train Epoch: {}\tLoss: {:.6f}'.format(
         epoch, 
-        100. * train_loss.iterations / len(train_loader),
         train_loss.value))
     
     print('Test set: Precision: {} Recall: {}\n'.format(
