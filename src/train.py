@@ -88,8 +88,6 @@ def main():
         100. * train_loss.iterations / len(train_loader),
         train_loss.value))
     
-    print('Test set: Precision: {},\t Recall: {}\n'.format(
-        val_stats.get_precision(), val_stats.get_recall()))
     print('Test set: Precision: {} Recall: {}\n'.format(
           val_stats.get_precision(), 
           val_stats.get_recall()))
