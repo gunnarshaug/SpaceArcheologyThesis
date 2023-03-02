@@ -106,7 +106,7 @@ def _write_results_summary_csv(stats, cfg):
     csv_writer.writerow([f"# of Train Images: {cfg.train.val_images}"])
     csv_writer.writerow([f"# of Test Images: {cfg.test.images}"])
     csv_writer.writerow([f"{cfg.name}"])
-    csv_writer.writerow([f"# of Test Images: {stats.count} "])
+    csv_writer.writerow([f"# of Test Images: {stats.get_counter()} "])
     csv_writer.writerow([f"# of True Positives: {stats.get_true_positives()}"])
     csv_writer.writerow([f"# of False Positives: {stats.get_false_positives()}"])
     csv_writer.writerow([f"# of False Negatives: {stats.get_false_negatives()}"])
