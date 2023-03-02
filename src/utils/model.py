@@ -1,9 +1,9 @@
 import csv
 import os
-import torchvision
 import torch
+import datetime
+import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-
 
 def get_pretrained_frcnn(num_classes=2):
   model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
@@ -82,16 +82,7 @@ def test(config, model, device, loader, stats, tb_writer):
   print("False negatives: ", stats.get_false_negatives())
   print("Recall: ", stats.get_recall())
   print("Precision: ", stats.get_precision())
-  _write_results_summary_csv(
-    config.model.path,
-    stats.counter, 
-    stats.get_true_positives(),
-    stats.get_false_positives(), 
-    stats.get_false_negatives(), 
-    config.train.optimizer.lr, 
-    config.test.epochs, 
-    config.model.name
-  )
+  _write_results_summary_csv(stats, config)
 
 
 # the function takes the original prediction and the iou threshold.
@@ -105,19 +96,30 @@ def _apply_nms(orig_prediction, iou_thresh=0.3):
   
   return final_prediction
 
-def _write_results_summary_csv(path, num_test_images, true_positives, false_positives, false_negatives, learning_rate, num_epoch, result_filename):
-  with open(os.path.join(path, result_filename + ".csv"), "w", newline='') as write_obj:
+def _write_results_summary_csv(stats, cfg):
+  timestamp = datetime.datetime.now().strftime('%d.%m.%Y_%H.%M.%S')
+  model_name = "{}_{}.csv".format(cfg.model.name, timestamp)
+  with open(os.path.join(cfg.model.path, model_name), "w", newline='') as write_obj:
     csv_writer = csv.writer(write_obj)
-    csv_writer.writerow([f"# of Test Images: {num_test_images} "])
-    csv_writer.writerow([f"# of True Positives: {true_positives}"])
-    csv_writer.writerow([f"# of False Positives: {false_positives}"])
-    csv_writer.writerow([f"# of False Negatives: {false_negatives}"])
-    csv_writer.writerow([f"Precision: {true_positives/(true_positives+false_positives)}"])
-    csv_writer.writerow([f"Recall: {true_positives/(true_positives+false_negatives)}"])
+    csv_writer.writerow([f"{cfg.name}"])
+    csv_writer.writerow([f"# of Train Images: {cfg.train.images}"])
+    csv_writer.writerow([f"# of Train Images: {cfg.train.val_images}"])
+    csv_writer.writerow([f"# of Test Images: {cfg.test.images}"])
+    csv_writer.writerow([f"{cfg.name}"])
+    csv_writer.writerow([f"# of Test Images: {stats.count} "])
+    csv_writer.writerow([f"# of True Positives: {stats.get_true_positives()}"])
+    csv_writer.writerow([f"# of False Positives: {stats.get_false_positives()}"])
+    csv_writer.writerow([f"# of False Negatives: {stats.get_false_negatives()}"])
+    csv_writer.writerow([f"Precision: {stats.get_precision()}"])
+    csv_writer.writerow([f"Recall: {stats.get_recall()}"])
     csv_writer.writerow("")
     csv_writer.writerow(["Model Settings:"])
-    csv_writer.writerow([f"# of Epochs: {num_epoch}"])
-    csv_writer.writerow([f"Learning Rate: {learning_rate}"])
+    csv_writer.writerow([f"# of Train Epochs: {cfg.train.epochs}"])
+    csv_writer.writerow([f"# of Test Epochs: {cfg.test.epochs}"])
+    csv_writer.writerow([f"Optimizer: {cfg.train.optimizer.name}"])
+    csv_writer.writerow([f"Learning Rate: {cfg.train.optimizer.lr}"])
+    csv_writer.writerow([f"Momentum: {cfg.train.optimizer.momentum}"])
+    csv_writer.writerow([f"Weight Decay: {cfg.train.optimizer.weight_decay}"])
 
 def _compute_accuracy(iou):
   predicted_boxes_count, gt_boxes_count = list(iou.size())

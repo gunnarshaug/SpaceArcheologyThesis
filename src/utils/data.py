@@ -60,7 +60,7 @@ class Mound(torch.utils.data.Dataset):
           transformed_bounding_boxes = torch.zeros((0, 4), dtype=torch.float32)
 
       labels = torch.ones(len(records), dtype=torch.int64)
-      
+      #NOTE: this will break if self.transform is false. transformed_bounding_boxes not defined
       tensor_bounding_boxes = torch.as_tensor(transformed_bounding_boxes, dtype=torch.float32)
       iscrowd = torch.zeros((tensor_bounding_boxes.shape[0],), dtype=torch.int64)
 

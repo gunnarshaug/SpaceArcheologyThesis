@@ -39,6 +39,11 @@ def main():
 
   train_loader = utils.data.get_dataloader(config, "train")
   val_loader = utils.data.get_dataloader(config, "val")
+  test_loader = utils.data.get_dataloader(config, "test")
+
+  config.train.images = len(train_loader)
+  config.train.val_images = len(val_loader)
+  config.test.images = len(test_loader)
 
   model = utils.model.get_pretrained_frcnn()
 
@@ -51,11 +56,11 @@ def main():
       weight_decay=config.train.optimizer.weight_decay
   )
 
-  # scheduler = torch.optim.lr_scheduler.StepLR(
-  #   optimizer, 
-  #   step_size= config.train.scheduler.step_size,
-  #   gamma=config.train.scheduler.gamma
-  # )
+  scheduler = torch.optim.lr_scheduler.StepLR(
+    optimizer, 
+    step_size= config.train.scheduler.step_size,
+    gamma=config.train.scheduler.gamma
+  )
 
   timestamp = datetime.datetime.now().strftime('%d.%m.%Y_%H.%M.%S')
   log_dir = 'tensorboard/frcnn_trainer_{}'.format(timestamp)
@@ -78,13 +83,16 @@ def main():
     tb_writer.add_scalar('Recall/train', val_stats.get_recall())
     tb_writer.flush()
 
-    print("Epoch {}  Batch {}  Loss {}".format(
-          epoch, 
-          train_loss.iterations, 
-          train_loss.value))
+    print('Train Epoch: {} [({:.0f}%)]\tLoss: {:.6f}'.format(
+        epoch, 
+        100. * train_loss.iterations / len(train_loader),
+        train_loss.value))
     
-    print('\nTest set: Precision: {},\t Recall: {}\n'.format(
+    print('Test set: Precision: {},\t Recall: {}\n'.format(
         val_stats.get_precision(), val_stats.get_recall()))
+    print('Test set: Precision: {} Recall: {}\n'.format(
+          val_stats.get_precision(), 
+          val_stats.get_recall()))
 
   if (args.save_model):
     print("saving model..")
@@ -96,7 +104,6 @@ def main():
                         "{}_{}_{}.pt".format(config.model.name, config.train.epochs, timestamp))
     torch.save(model,path)
 
-  test_loader = utils.data.get_dataloader(config, "test")
   test_stats = utils.metrics.Stats()
   utils.model.test(config, model, device, test_loader, test_stats, tb_writer)
   # tb_writer.add_scalar('Precision/test', test_stats.get_precision())
