@@ -2,19 +2,17 @@ name: pytorch_env
 channels:
   - pytorch
   - conda-forge
+  - anaconda
+  - defaults
 dependencies:
   - python=3.9
-  - cudatoolkit=11.4
-  - pytorch
-  - torchvision
-  - albumentations
+  - cudatoolkit=11.3
+  - pytorch=1.11.0
+  - torchvision=0.12.0
   - matplotlib
   - tensorboard
   - pyyaml
   - pandas
-  - numpy
-  - pillow
-  - opencv
-  # - pip
-  # - pip:
-  #   - opencv-python
+  - pip
+  - pip:
+    - -r requirements.txt
