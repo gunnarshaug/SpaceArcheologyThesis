@@ -1,7 +1,6 @@
 import csv
 import os
 import torch
-import datetime
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
@@ -97,14 +96,13 @@ def _apply_nms(orig_prediction, iou_thresh=0.3):
   return final_prediction
 
 def _write_results_summary_csv(stats, cfg):
-  timestamp = datetime.datetime.now().strftime('%d.%m.%Y_%H.%M.%S')
-  model_name = "{}_{}.csv".format(cfg.model.name, timestamp)
+  model_name = "{}_{}.csv".format(cfg.model.name, cfg.timestamp)
   with open(os.path.join(cfg.model.path, model_name), "w", newline='') as write_obj:
     csv_writer = csv.writer(write_obj)
-    csv_writer.writerow([f"{cfg.name}"])
-    csv_writer.writerow([f"# of Train Images: {cfg.train.images}"])
-    csv_writer.writerow([f"# of Train Images: {cfg.train.val_images}"])
-    csv_writer.writerow([f"# of Test Images: {cfg.test.images}"])
+    # csv_writer.writerow([f"{cfg.name}"])
+    # csv_writer.writerow([f"# of Train Images: {cfg.train.images}"])
+    # csv_writer.writerow([f"# of Train Images: {cfg.train.val_images}"])
+    # csv_writer.writerow([f"# of Test Images: {cfg.test.images}"])
     csv_writer.writerow([f"{cfg.name}"])
     csv_writer.writerow([f"# of Test Images: {stats.get_counter()} "])
     csv_writer.writerow([f"# of True Positives: {stats.get_true_positives()}"])

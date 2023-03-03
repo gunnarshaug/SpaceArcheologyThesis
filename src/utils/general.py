@@ -1,5 +1,6 @@
 import os
 import yaml
+import datetime
 
 class Dict:
     def __init__(self, **kwargs):
@@ -8,6 +9,8 @@ class Dict:
                 self.__dict__[key] = Dict(**value)
             else:
                 self.__dict__[key] = value
+        self.__dict__["timestamp"] = datetime.datetime.now().strftime('%d.%m.%Y_%H.%M.%S')
+
 
 def _get_cfg_path(relative_path):
     current_path = os.path.realpath(__file__)

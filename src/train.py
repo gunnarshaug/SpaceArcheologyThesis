@@ -41,9 +41,7 @@ def main():
   val_loader = utils.data.get_dataloader(config, "val")
   test_loader = utils.data.get_dataloader(config, "test")
 
-  config.train.images = len(train_loader)
-  config.train.val_images = len(val_loader)
-  config.test.images = len(test_loader)
+
 
   model = utils.model.get_pretrained_frcnn()
 
@@ -62,8 +60,7 @@ def main():
     gamma=config.train.scheduler.gamma
   )
 
-  timestamp = datetime.datetime.now().strftime('%d.%m.%Y_%H.%M.%S')
-  log_dir = 'tensorboard/frcnn_trainer_{}'.format(timestamp)
+  log_dir = 'tensorboard/frcnn_trainer_{}'.format(config.timestamp)
   comment = 'LR_{}_BATCH_{}' .format(config.train.batch_size, config.train.optimizer.lr)
   tb_writer = torch.utils.tensorboard.SummaryWriter(log_dir, comment=comment)
 
@@ -98,7 +95,7 @@ def main():
       os.makedirs(config.model.path)
 
     path = os.path.join(config.model.path,
-                        "{}_{}_{}.pt".format(config.model.name, config.train.epochs, timestamp))
+                        "{}_{}_{}.pt".format(config.model.name, config.train.epochs, config.timestamp))
     torch.save(model,path)
 
   test_stats = utils.metrics.Stats()
