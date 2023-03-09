@@ -1,21 +1,20 @@
 import torch.utils.tensorboard
 import torch
 import os
-import datetime
 import argparse
 import utils.metrics
-import utils.data
 import utils.general
 import utils.model
+from data.dataloaders import(MainDataLoader)
+from trainer.trainer import (Trainer)
+
 
 def parse_args():
   parser = argparse.ArgumentParser(description='Pytorch Faster R-CNN')
   parser.add_argument('--no-cuda', action='store_true', default=False,
-                      help='disables CUDA training')
+                      help='disables CUDA training. Not recommended.')
   parser.add_argument('--seed', type=int, default=1, metavar='S',
                       help='random seed (default: 1)')
-  parser.add_argument('--log-interval', type=int, default=1, metavar='N',
-                      help='how many batches to wait before logging training status')
   parser.add_argument('--save-model', action='store_true', default=True,
                       help='For Saving the current Model')
   parser.add_argument('--config',
@@ -25,86 +24,74 @@ def parse_args():
 
 def main():
   args = parse_args()
+
   try:
     config = utils.general.load_cfg(args.config)
   except FileNotFoundError as ex:
+    print(f"ERROR: Cannot find config file {args.config}")
     print(ex.strerror, ex.filename)
+    print(f"stopping program...")
     return
     
   use_cuda = not args.no_cuda and torch.cuda.is_available()
 
+  if not use_cuda:
+    print("WARNING: running training with CPU.")
+  
+  # this is to get the same result in every pass
   torch.manual_seed(args.seed)
+
   device = torch.device("cuda" if use_cuda else "cpu")
-  print("Using {} device training.".format(device.type))
 
-  train_loader = utils.data.get_dataloader(config, "train")
-  val_loader = utils.data.get_dataloader(config, "val")
-  test_loader = utils.data.get_dataloader(config, "test")
+  data_config = config["dataset"]
+  loader_kwargs = {
+    "data_dir": data_config["path"],
+    "dataset_type": data_config["type"],
+    "transform_opts": data_config["transform"],
+    "num_workers": data_config["loader"]["num_workers"],
+    "batch_size": data_config["loader"]["batch_size"],
+  }
 
+  train_loader = MainDataLoader(
+    mode="train",
+    **loader_kwargs
+  )
 
+  val_loader = MainDataLoader(
+    mode="val",
+    **loader_kwargs
+  )
 
   model = utils.model.get_pretrained_frcnn()
-
   model.to(device)
-  
+
+  optimizer_config = config["trainer"]["optimizer"]
   optimizer = torch.optim.SGD(
       params=[p for p in model.parameters() if p.requires_grad],
-      lr=config.train.optimizer.lr,
-      momentum=config.train.optimizer.momentum,
-      weight_decay=config.train.optimizer.weight_decay
+      lr=optimizer_config["lr"],
+      momentum=optimizer_config["momentum"],
+      weight_decay=optimizer_config["weight_decay"]
   )
 
-  scheduler = torch.optim.lr_scheduler.StepLR(
+  scheduler_config = config["trainer"]["scheduler"]
+  lr_scheduler = torch.optim.lr_scheduler.StepLR(
     optimizer, 
-    step_size= config.train.scheduler.step_size,
-    gamma=config.train.scheduler.gamma
+    step_size= scheduler_config["step_size"],
+    gamma=scheduler_config["gamma"]
   )
 
-  log_dir = 'tensorboard/frcnn_trainer_{}'.format(config.timestamp)
-  comment = 'LR_{}_BATCH_{}' .format(config.train.batch_size, config.train.optimizer.lr)
-  tb_writer = torch.utils.tensorboard.SummaryWriter(log_dir, comment=comment)
+  trainer = Trainer(
+    model=model, 
+    optimizer=optimizer,
+    config=config,
+    device=device, 
+    dataloader=train_loader,
+    val_dataloader=val_loader, 
+    lr_scheduler=lr_scheduler,
+    save_model=args.save_model
+  )
 
-  train_loss = utils.metrics.Averager()
-  val_stats = utils.metrics.Stats()
-
-  for epoch in range(1, config.train.epochs + 1):
-    train_loss.reset()
-    utils.model.train_one_epoch(model, device, train_loader, optimizer, train_loss)
-    scheduler.step()
-    utils.model.validate(model, device, val_loader, val_stats)
-
-    tb_writer.add_scalar('Loss/train', 
-                          train_loss.value, 
-                          epoch)
-    tb_writer.add_scalar('Precision/train', val_stats.get_precision(), epoch)
-    tb_writer.add_scalar('Recall/train', val_stats.get_recall(), epoch)
-    tb_writer.flush()
-
-    print('Train Epoch: {}\tLoss: {}'.format(
-        epoch, 
-        train_loss.value))
-    
-    print('Test set: Precision: {} Recall: {}\n'.format(
-          val_stats.get_precision(), 
-          val_stats.get_recall()))
-
-  if (args.save_model):
-    print("saving model..")
-    if not os.path.exists(config.model.path):
-      print("creating model path: {}".format(config.model.path))
-      os.makedirs(config.model.path)
-
-    path = os.path.join(config.model.path,
-                        "{}_{}_{}.pt".format(config.model.name, config.train.epochs, config.timestamp))
-    torch.save(model,path)
-
-  test_stats = utils.metrics.Stats()
-  utils.model.test(config, model, device, test_loader, test_stats, tb_writer)
-  # tb_writer.add_scalar('Precision/test', test_stats.get_precision())
-  # tb_writer.add_scalar('Recall/test', test_stats.get_recall())
-
-  tb_writer.flush()
-  tb_writer.close()
+  trainer.train()
 
 if __name__ == "__main__":
   print(torch.cuda.is_available())

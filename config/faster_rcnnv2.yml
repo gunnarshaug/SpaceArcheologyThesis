@@ -1,6 +1,6 @@
 name: REPLICATION
 dataset:
-  type: Dataset2022
+  type: PascalVOCDataset
   path: ./datasets/slope
   loader:
     num_workers: 4
