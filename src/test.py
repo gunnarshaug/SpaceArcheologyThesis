@@ -15,7 +15,7 @@ def parse_args():
                       default='datasets/slope/test', type=str)
   parser.add_argument('--config', 
                       help='config file path',
-                      default='config/faster_rcnn.yml', type=str)
+                      default='faster_rcnn.yml', type=str)
   parser.add_argument('--model',
                       help='path to model',
                       default='models/slope.pt', type=str)
@@ -24,7 +24,15 @@ def parse_args():
 
 def main():
   args = parse_args()
-  config = utils.general.load_cfg(args.config)
+  cfg_path = os.path.join("config", args.config)
+  try:
+    config = utils.general.load_cfg(cfg_path)
+  except FileNotFoundError as ex:
+    print(f"ERROR: Cannot find config file {args.config}")
+    print(ex.strerror, ex.filename)
+    print(f"stopping program...")
+    return
+
   test_loader = utils.data.MoundDataset2022.get_dataloader(config, "test")
   model_path = os.path.join(config["model"]["path"], config["model"]["name"])
   use_cuda = torch.cuda.is_available()

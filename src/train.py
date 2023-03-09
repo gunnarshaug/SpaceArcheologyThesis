@@ -24,9 +24,10 @@ def parse_args():
 
 def main():
   args = parse_args()
+  cfg_path = os.path.join("config", args.config)
 
   try:
-    config = utils.general.load_cfg(args.config)
+    config = utils.general.load_cfg(cfg_path)
   except FileNotFoundError as ex:
     print(f"ERROR: Cannot find config file {args.config}")
     print(ex.strerror, ex.filename)

@@ -38,7 +38,7 @@ class Stats:
   def get_counter(self) -> int:
     return self.counter
   
-  def _compute_accuracy(iou : torch.Tensor) -> tuple:
+  def _compute_accuracy(self, iou : torch.Tensor) -> tuple:
     predicted_boxes_count, gt_boxes_count = list(iou.size())
       
     fp = 0
