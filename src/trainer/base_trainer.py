@@ -6,17 +6,11 @@ import os
 import logging
 import utils.general
 import utils.model
-import torchvision
-# logger.debug('debug message')
-# logger.info('info message')
-# logger.warning('warn message')
-# logger.error('error message')
-# logger.critical('critical message')
 
 class BaseTrainer:
     def __init__(self, model, optimizer, config:dict, save_model:bool):
         self.config = config
-
+        utils.general.setup_logging()
         self.logger = logging.getLogger('trainer')
 
         self.model = model

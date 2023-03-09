@@ -19,7 +19,7 @@ def parse_args():
                       help='For Saving the current Model')
   parser.add_argument('--config',
                       help='location of config file',
-                      default='config/faster_rcnn.yml', type=str)
+                      default='faster_rcnn.yml', type=str)
   return parser.parse_args()
 
 def main():
