@@ -1,4 +1,4 @@
-name: pytorch_env
+name: pytorch_cpuonly
 channels:
   - pytorch
   - conda-forge
@@ -6,9 +6,9 @@ channels:
   - defaults
 dependencies:
   - python=3.9
-  - cudatoolkit=11.3
   - pytorch=1.11.0
   - torchvision=0.12.0
+  - cpuonly
   - matplotlib
   - tensorboard
   - pyyaml
