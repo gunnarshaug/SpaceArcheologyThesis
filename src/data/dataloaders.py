@@ -5,7 +5,7 @@ import utils.general
 import os
 
 
-class DataLoadersTrainSplit:
+class DataLoaders:
     """
     DataLoaders used for object detection in space archeology
     """
@@ -40,16 +40,14 @@ class DataLoadersTrainSplit:
                 self.transform_opts, 
                 is_train=True
             )
-            dataset = getattr(module_data, self.dataset_type)(
-                root_dir=self.data_dir
+            self.train = getattr(module_data, self.dataset_type)(
+                root_dir=os.path.join(self.data_dir, "train"),
+                transform=train_transform
             )
-            # self.val = getattr(module_data, self.dataset_type)(
-            #     root_dir=os.path.join(self.data_dir, "train"),
-            #     transform=val_transform
-            # )
-            train_set_size = int(len(dataset) * 0.8)
-            val_set_size = len(dataset) - train_set_size   
-            self.train, self.val = random_split(dataset, [train_set_size, val_set_size])
+            self.val = getattr(module_data, self.dataset_type)(
+                root_dir=os.path.join(self.data_dir, "val"),
+                transform=val_transform
+            )
 
             self.train.transform = train_transform
             self.val.transform = val_transform
