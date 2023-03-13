@@ -44,9 +44,9 @@ def main():
   loader_kwargs = {
     "data_dir": config["dataset"]["path"],
     "dataset_type": config["dataset"]["type"],
-    "transform_opts": config["dataset"]["transform"],
-    "num_workers": config['dataset']["loader"]["num_workers"],
-    "batch_size": config['trainer']["loader"]["batch_size"],
+    "transform_opts": config["transform"],
+    "num_workers": ["dataloader"]["num_workers"],
+    "batch_size": config["dataloader"]["batch_size"],
   }
 
   test_loader = MainDataLoader(
@@ -54,7 +54,7 @@ def main():
     **loader_kwargs
   )
 
-  test_stats = utils.metrics.Stats()
+  test_stats = utils.metrics.Metrics()
   log_dir = 'tensorboard/frcnn_tester_{}'.format(config["timestamp"])
   tb_writer = SummaryWriter(log_dir)
 
@@ -71,8 +71,8 @@ def main():
         nms_prediction['boxes'].to(device), 
         ground_truth['boxes'].to(device)
       )
-
-      tp, fp, fn = utils.model.compute_accuracy(iou)
+      #OBS! update to correct function!
+      tp, fp, fn = utils.model.compu(iou)
       test_stats.update(iou)
 
       if(idx == 0 and i == 0):

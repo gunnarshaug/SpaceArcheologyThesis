@@ -31,7 +31,7 @@ def load_cfg(config_path, is_absolute=False) -> dict:
         config_path = _get_cfg_path(config_path)
         
     config = load_yaml(config_path)
-    config['timestamp'] = datetime.datetime.now().strftime('%d.%m.%Y_%H.%M.%S')
+    # config['timestamp'] = datetime.datetime.now().strftime('%d.%m.%Y_%H.%M.%S')
     return config
     # return Dict(**config)
 

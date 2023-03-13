@@ -6,7 +6,7 @@ import utils.metrics
 import utils.general
 import utils.model
 from data.dataloaders import(MainDataLoader)
-from trainer.trainer import (Trainer)
+from trainers.trainer import (Trainer)
 
 
 def parse_args():
@@ -44,13 +44,12 @@ def main():
 
   device = torch.device("cuda" if use_cuda else "cpu")
 
-  data_config = config["dataset"]
   loader_kwargs = {
-    "data_dir": data_config["path"],
-    "dataset_type": data_config["type"],
-    "transform_opts": data_config["transform"],
-    "num_workers": data_config["loader"]["num_workers"],
-    "batch_size": data_config["loader"]["batch_size"],
+    "data_dir": config["dataset"]["path"],
+    "dataset_type": config["dataset"]["type"],
+    "transform_opts": config["transform"],
+    "num_workers": config["dataloader"]["num_workers"],
+    "batch_size": config["dataloader"]["batch_size"],
   }
 
   train_loader = MainDataLoader(
@@ -66,12 +65,11 @@ def main():
   model = utils.model.get_pretrained_frcnn()
   model.to(device)
 
-  optimizer_config = config["trainer"]["optimizer"]
   optimizer = torch.optim.SGD(
       params=[p for p in model.parameters() if p.requires_grad],
-      lr=optimizer_config["lr"],
-      momentum=optimizer_config["momentum"],
-      weight_decay=optimizer_config["weight_decay"]
+      lr=config["optimizer"]["lr"],
+      momentum=config["optimizer"]["momentum"],
+      weight_decay=config["optimizer"]["weight_decay"]
   )
 
   scheduler_config = config["trainer"]["scheduler"]
