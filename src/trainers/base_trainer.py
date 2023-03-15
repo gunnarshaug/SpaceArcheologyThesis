@@ -33,7 +33,7 @@ class BaseTrainer:
         """
         raise NotImplementedError
     @abstractmethod
-    def _validate_step(self, inputs, targets):
+    def _test_step(self, inputs, targets):
         """
         Testing logic.
         """
@@ -77,7 +77,9 @@ class BaseTrainer:
         for idx, (images, targets ) in enumerate(self.test_dataloader):
             images = list(image.to(self.device) for image in images)
             targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
-            self._test_step(images, targets)
+            boxes = self._test_step(images, targets)
+            
+            self.logger.log_images(images, boxes)
             
         self.logger.log_metrics({
             "Test/NoImages": self.test_metrics.counter,

@@ -50,7 +50,7 @@ class Trainer(trainers.base_trainer.BaseTrainer):
             boxes.append(nms_prediction["boxes"])
             self.test_metrics.update(iou)
         return boxes
-                   
+
     @property
     def model(self):
         if(self._model is None):
