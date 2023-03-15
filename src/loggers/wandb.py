@@ -7,12 +7,9 @@ import datetime
 class WandbLogger(Logger):
     def __init__(
         self,
-        experiment_name: str,
-        dtm_vs_technique: str,
-        experiment_description: str,
         config:dict,
-        save_dir:str = ".",
         version: str = None,
+        save_dir: str = ".",
         dir: str = None,
         id: str = None,
         anonymous: Optional[bool] = None,
@@ -26,16 +23,19 @@ class WandbLogger(Logger):
 
         self.config = config
         self.timestamp = datetime.datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
-
+        logger_config = self.config["logger"]
         self._wandb_init: Dict[str, Any] = dict(
-            project=experiment_name,
-            notes=experiment_description,
-            name=f"run_{self.timestamp}_{dtm_vs_technique}",
+            project=logger_config["experiment_name"],
+            notes=logger_config["experiment_description"],
+            name="run_{0}_{1}".format(
+                self.timestamp,
+                logger_config["dtm_vs_technique"]
+            ),
             dir=save_dir or dir,
             id=version or id,
             resume="allow",
             anonymous=("allow" if anonymous else None),
-            tags=[dtm_vs_technique],
+            tags=[logger_config['dtm_vs_technique']],
             config=self.config
         )
         self._wandb_init.update(**kwargs)
@@ -50,7 +50,6 @@ class WandbLogger(Logger):
         }
             
     def log_metrics(self, metrics: dict, step: Optional[int] = None) -> None:
-    # def log_metrics(self, metrics: Dict[str, float], step: Optional[int] = None) -> None:
         if step is not None:
             self.experiment.log(metrics, step)
         else:
@@ -65,12 +64,9 @@ class WandbLogger(Logger):
     def _generate_bounding_boxes(self, image, bboxes_list):
 
         all_boxes = []
-        # plot each bounding box for this image
         for boxes in bboxes_list:
             for box in boxes:
-                # get coordinates and labels
                 x_min, y_min, x_max, y_max = box
-                print(float(x_min), y_min, x_max, y_max)
                 box_data = {
                     "position": {
                         "minX": float(x_min),
@@ -84,8 +80,7 @@ class WandbLogger(Logger):
                 }
                 all_boxes.append(box_data)
                 
-        # log to wandb: raw image, predictions, and dictionary of class labels for each class id
-        box_image = wandb.Image(image, boxes = {"predictions": {"box_data": all_boxes, "class_labels" : self.class_id_to_label}})
+        box_image = wandb.Image(image, boxes={"predictions": {"box_data": all_boxes, "class_labels" : self.class_id_to_label}})
         return box_image
 
     @property

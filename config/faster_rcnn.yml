@@ -1,17 +1,16 @@
 data:
-  class: PascalVOCDataset
-  path: datasets\Sarpsborg_Halden_2009\testing_data
+  dataset_type: PascalVOCDataset
+  data_dir: datasets\Sarpsborg_Halden_2009\testing_data
   batch_size: 10
   num_workers: 4
-
-transform: 
-  width: 224
-  height: 224
+  transform_opts: 
+    width: 224
+    height: 224
 
 model:
-  backbone: resnet50
   type: faster-rcnn
-  num_layers: 18
+  pre_trained: True
+  backbone: resnet50
 
 training:
   epochs: 1
