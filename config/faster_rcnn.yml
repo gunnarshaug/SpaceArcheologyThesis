@@ -1,31 +1,32 @@
-name: REPLICATION
-dataset:
-  type: Dataset2022
-  path: ./datasets/slope
-  loader:
-    num_workers: 4
-    batch_size: 10
-  transform: 
+data:
+  dataset_type: PascalVOCDataset
+  data_dir: datasets\Sarpsborg_Halden_2009\testing_data
+  batch_size: 10
+  num_workers: 4
+  transform_opts: 
     width: 224
     height: 224
 
-trainer:
-  epochs: 120
-  
-  optimizer: 
-    name: SDG
+model:
+  type: faster-rcnn
+  pre_trained: True
+  backbone: resnet50
+
+training:
+  epochs: 1
+  optimizer:    
+    type: sdg
     lr: 0.005
     momentum: 0.9
     weight_decay: 0.0005
-  scheduler:
+  scheduler: 
+    type: steplr
     step_size: 30
     gamma: 0.1
 
-test:
-  epochs: 120
 
-model:
-  classes: 2 # one class for the background and one for burial mounds
-  path: ./models/replication/
-  name: "Slope_RGB_Fixed_Val_Add_Augm"
-
+logger:
+  dtm_vs_technique: "SLOPE"
+  experiment_name: "Sarpsborg_Halden_2009"
+  experiment_description: This is an experiment used for testing purposes only.
+  save_dir: logging

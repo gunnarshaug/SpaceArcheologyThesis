@@ -5,7 +5,21 @@ from pathlib import Path
 import albumentations as a
 import albumentations.pytorch.transforms
 import os
+import logging
 
+
+def setup_logging():
+  logging.basicConfig(
+      level=logging.DEBUG,
+      format="%(asctime)s [%(levelname)s] %(message)s",
+      handlers=[
+          logging.FileHandler("debug.log"),
+          logging.StreamHandler()
+      ]
+  )
+def load_yaml(path):
+    with open(path) as file:
+        return yaml.safe_load(file)
 
 def _get_cfg_path(relative_path):
     current_path = os.path.realpath(__file__)
@@ -16,10 +30,8 @@ def load_cfg(config_path, is_absolute=False) -> dict:
     if is_absolute == False:
         config_path = _get_cfg_path(config_path)
         
-    with open(config_path) as file:
-        config = yaml.safe_load(file)
-    
-    config['timestamp'] = datetime.datetime.now().strftime('%d.%m.%Y_%H.%M.%S')
+    config = load_yaml(config_path)
+    # config['timestamp'] = datetime.datetime.now().strftime('%d.%m.%Y_%H.%M.%S')
     return config
     # return Dict(**config)
 

@@ -1,7 +1,7 @@
 datasets/
-models/
-tensorboard/
-*.out
+wandb/
+replication/
+experiments/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
