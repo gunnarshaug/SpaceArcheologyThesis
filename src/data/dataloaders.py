@@ -27,7 +27,6 @@ class DataLoaders:
 
     def setup(self, stage: Optional[str] = None):
         """
-        Prepare training and testing data. Training = 90%, Validation = 10%
         :param stage: Tells what stage the trainer has been called with.
         """
         val_transform = utils.general.get_transform(

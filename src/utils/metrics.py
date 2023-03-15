@@ -1,5 +1,5 @@
 import torch
-import pandas as pd
+
 class Metrics:
   def __init__(self):
     self.tp = 0
@@ -56,9 +56,9 @@ class Metrics:
     for box in iou:
       valid_hits = [i for i, x in enumerate(box) if x > 0.5 ]
       if len(valid_hits) == 0:
-        fp = fp + 1
+        fp += 1
         continue
-      tp = tp + 1
+      tp += 1
       
     fn = gt_boxes_count - tp
     return tp, fp, fn

@@ -3,5 +3,6 @@ from typing import Optional, Dict
 
 class Logger(ABC):
     @abstractmethod
-    def log_metrics(self, metrics: Dict[str, float], step: Optional[int] = None):
+    def log_metrics(self, metrics: dict, step: Optional[int] = None):
         raise NotImplementedError
+    
