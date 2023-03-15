@@ -74,12 +74,13 @@ class BaseTrainer:
         self.test_dataloader = data_loaders.test_dataloader()
         self.model.eval() 
 
-        for idx, (images, targets ) in enumerate(self.test_dataloader):
+        for batch_idx, (images, targets ) in enumerate(self.test_dataloader):
             images = list(image.to(self.device) for image in images)
             targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
             boxes = self._test_step(images, targets)
             
-            self.logger.log_images(images, boxes)
+            if(batch_idx%self.log_step):       
+                self.logger.log_images(images, boxes)
             
         self.logger.log_metrics({
             "Test/NoImages": self.test_metrics.counter,
@@ -122,10 +123,7 @@ class BaseTrainer:
                 targets = [{k: v.to(self.device) for k, v in t.items()} for t in labels]
                
                 self._validate_step(images, targets)
-                
-                ##TODO: implement this when testing instead.
-                # self.logger.log_image(images, bboxes_list, key=idx)
-                
+                                
     def _progress_text(self, batch_idx):
         base = "[{}/{} ({:.0f}%)]"
         current = batch_idx
