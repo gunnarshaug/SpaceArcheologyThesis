@@ -1,6 +1,6 @@
 data:
   dataset_type: Dataset2022
-  data_dir: datasets\slope
+  data_dir: datasets/slope
   batch_size: 10
   num_workers: 4
   transform_opts: 
