@@ -2,12 +2,14 @@ import torch
 import utils.metrics
 from loggers.logger import Logger
 import numpy as np
+import random
 from abc import abstractproperty, abstractmethod
 
 class BaseTrainer:
     def __init__(self, 
                  device:str,
-                 logger: Logger):
+                 logger: Logger,
+                 save_model: bool=True):
         self.device = device
         self.logger = logger
         self.train_loss = utils.metrics.Averager()
@@ -18,6 +20,10 @@ class BaseTrainer:
         
         self.optimizer = self.configure_optimizer()
         self.lr_scheduler = self.configure_lr_scheduler()
+        self.save_model = save_model
+        
+        # self.log_image_batch_idx = np.random.randint(0, self.logger["batch_size"])
+        self.log_image_batch_idx = 0
         
     @abstractmethod
     def _train_step(self, inputs, labels):
@@ -59,7 +65,7 @@ class BaseTrainer:
             self.lr_scheduler.step()
             self._validate_epoch(epoch)
             
-            print("Test set: Precision: {} Recall: {}\n".format(
+            print("Val set: Precision: {} Recall: {}\n".format(
                 self.val_metrics.precision, 
                 self.val_metrics.recall))
 
@@ -69,6 +75,9 @@ class BaseTrainer:
                 "Train/Recall": self.val_metrics.recall,
                 "Train/Precision": self.val_metrics.precision,
             })
+        if self.save_model:
+            self.logger.save_model(self.model)
+        
     def test(self, data_loaders):
         data_loaders.setup("test")
         self.test_dataloader = data_loaders.test_dataloader()
@@ -78,9 +87,10 @@ class BaseTrainer:
             images = list(image.to(self.device) for image in images)
             targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
             boxes = self._test_step(images, targets)
-            
-            if(batch_idx%self.log_step):       
-                self.logger.log_images(images, boxes)
+                        
+            if batch_idx == self.log_image_batch_idx and boxes is not None:
+                for idx, image in enumerate(images):     
+                    self.logger.log_image(image, boxes[idx], targets[idx])
             
         self.logger.log_metrics({
             "Test/NoImages": self.test_metrics.counter,

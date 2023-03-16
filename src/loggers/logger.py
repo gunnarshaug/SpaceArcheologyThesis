@@ -7,5 +7,9 @@ class Logger(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def log_images(self,  images, bboxes, key):
+    def log_image(self,  images, bboxes, key):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def save_model(self, model):
         raise NotImplementedError

@@ -47,7 +47,7 @@ class Trainer(trainers.base_trainer.BaseTrainer):
                 nms_prediction['boxes'].to(self.device),
                 ground_truth['boxes'].to(self.device)
             )
-            boxes.append(nms_prediction["boxes"])
+            boxes.append(nms_prediction)
             self.test_metrics.update(iou)
         return boxes
 

@@ -3,6 +3,9 @@ from typing import Optional, Any, Dict
 import wandb
 from loggers.logger import Logger
 import datetime
+import os
+import torch
+import utils.general
 
 class WandbLogger(Logger):
     def __init__(
@@ -55,33 +58,44 @@ class WandbLogger(Logger):
         else:
             self.experiment.log(metrics)
 
-    def log_images(self, images, bboxes, key="images"):
+    def log_image(self, image, predictions, boxes_ground_truth, key="images"):
 
-        wandb_images = [self._generate_bounding_boxes(image, bboxes) for image in images]
-        # wandb_images = [wandb.Image(image, caption="Top: Output, Bottom: SLOPE Image") for image in images]
-        self.experiment.log({str(key): wandb_images})
+        # wandb_image = [self._generate_bounding_boxes(image, bboxes)]
+        boxes = {
+            "predictions":
+            {
+                "box_data": self._get_bounding_boxes(predictions["boxes"], 1),
+                "class_labels" : self.class_id_to_label
+            },
+            "ground_truth":
+            {
+                "box_data": self._get_bounding_boxes(boxes_ground_truth["boxes"], 1),
+                "class_labels" : self.class_id_to_label 
+            }
+        }
+        wandb_image = [wandb.Image(image, boxes=boxes)]
 
-    def _generate_bounding_boxes(self, image, bboxes_list):
+        self.experiment.log({str(key): wandb_image})
+
+    def _get_bounding_boxes(self, boxes, class_id):
 
         all_boxes = []
-        for boxes in bboxes_list:
-            for box in boxes:
-                x_min, y_min, x_max, y_max = box
-                box_data = {
-                    "position": {
-                        "minX": float(x_min),
-                        "maxX": float(x_max),
-                        "minY": float(y_min),
-                        "maxY": float(y_max)
-                    },
-                    "class_id" : 1,
-                    "box_caption": "mound",
-                    "domain" : "pixel"
-                }
-                all_boxes.append(box_data)
+        for box in boxes:
+            x_min, y_min, x_max, y_max = box
+            box_data = {
+                "position": {
+                    "minX": float(x_min),
+                    "maxX": float(x_max),
+                    "minY": float(y_min),
+                    "maxY": float(y_max)
+                },
+                "class_id" : class_id,
+                "box_caption": self.class_id_to_label[class_id],
+                "domain" : "pixel"
+            }
+            all_boxes.append(box_data)
                 
-        box_image = wandb.Image(image, boxes={"predictions": {"box_data": all_boxes, "class_labels" : self.class_id_to_label}})
-        return box_image
+        return all_boxes
 
     @property
     def experiment(self):
@@ -102,3 +116,10 @@ class WandbLogger(Logger):
                 self._experiment.define_metric("Train/Recall", summary="max")
 
         return self._experiment
+    
+    def save_model(self, model):
+        model_dir = os.path.join("models", self.experiment.project, self.experiment.name)
+        utils.general.ensure_existing_dir(model_dir)
+        filename = "{}_{}.pt".format(self.timestamp, self.experiment.id)
+        torch.save(model, os.path.join(model_dir, filename))
+        
