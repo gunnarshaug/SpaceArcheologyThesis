@@ -94,6 +94,7 @@ class BaseTrainer:
             
     def _train_epoch(self, epoch):
         self.model.train()
+        length = len(self.dataloader)
         for batch_idx, (inputs, labels) in enumerate(self.dataloader):
             images = list(image.to(self.device) for image in inputs)
             targets = [{k: v.to(self.device) for k, v in t.items()} for t in labels]
@@ -108,10 +109,10 @@ class BaseTrainer:
             # adjust learning weights based on the gradients we just computed
             self.optimizer.step()
             
-            if batch_idx % self.log_step == 0:
+            if (batch_idx+1) % self.log_step == 0:
                 print("Train Epoch: {} {} Loss: {:.6f}".format(
                     epoch,
-                    self._progress_text(batch_idx),
+                    self._progress_text(batch_idx+1, length),
                     self.train_loss.value))
                 
     def _validate_epoch(self, epoch):
@@ -124,10 +125,9 @@ class BaseTrainer:
                
                 self._validate_step(images, targets)
                                 
-    def _progress_text(self, batch_idx):
+    def _progress_text(self, batch_idx, total):
         base = "[{}/{} ({:.0f}%)]"
         current = batch_idx
-        total = self.epochs
         return base.format(current, total, 100.0 * current / total)
 
     def configure_optimizer(self):
