@@ -9,7 +9,7 @@ class WandbLogger(Logger):
         self,
         config:dict,
         version: str = None,
-        save_dir: str = ".",
+        save_dir: str = None,
         dir: str = None,
         id: str = None,
         anonymous: Optional[bool] = None,

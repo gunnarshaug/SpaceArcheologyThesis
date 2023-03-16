@@ -1,6 +1,6 @@
 data:
-  dataset_type: PascalVOCDataset
-  data_dir: datasets\Sarpsborg_Halden_2009\testing_data
+  dataset_type: Dataset2022
+  data_dir: datasets\slope
   batch_size: 10
   num_workers: 4
   transform_opts: 
@@ -13,7 +13,7 @@ model:
   backbone: resnet50
 
 training:
-  epochs: 1
+  epochs: 10
   optimizer:    
     type: sdg
     lr: 0.005
@@ -26,7 +26,7 @@ training:
 
 
 logger:
-  dtm_vs_technique: "SLOPE"
-  experiment_name: "Sarpsborg_Halden_2009"
+  dtm_vs_technique: SLOPE
+  experiment_name: Sarpsborg_Halden_2009
   experiment_description: This is an experiment used for testing purposes only.
   save_dir: logging
