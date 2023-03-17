@@ -5,9 +5,7 @@ import utils.metrics
 import utils.general
 import utils.model
 import trainers.trainer
-import loggers.wandb
 import data.dataloaders
-
 
 def parse_args():
   parser = argparse.ArgumentParser(description='Pytorch Faster R-CNN')
@@ -38,17 +36,16 @@ def main():
   torch.manual_seed(args.seed)
 
   device = torch.device("cuda" if use_cuda else "cpu")
-  
-  logger = loggers.wandb.WandbLogger(
-    config=config
-  )
 
   trainer = trainers.trainer.Trainer(
-    logger=logger,
+    config=config,
     device=device
   )
   
-  data_loaders = data.dataloaders.DataLoaders(**logger.config["data"])
+  data_loaders = data.dataloaders.DataLoaders(
+    dataset_config=config["classes"]["dataset"],
+    **config["data"]
+  )
 
   trainer.train(data_loaders)
   

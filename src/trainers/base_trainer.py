@@ -9,14 +9,16 @@ class BaseTrainer:
     def __init__(self, 
                  device:str,
                  logger: Logger,
+                 config: dict,
                  save_model: bool=True):
         self.device = device
         self.logger = logger
         self.train_loss = utils.metrics.Averager()
         self.val_metrics = utils.metrics.Metrics()
         self.test_metrics = utils.metrics.Metrics()
-        self.epochs = self.logger.config["training"]["epochs"]
-        self.log_step = int(np.sqrt(self.logger.config["data"]["batch_size"]))
+        self.config = config
+        self.epochs = self.config["training"]["epochs"]
+        self.log_step = int(np.sqrt(self.config["data"]["batch_size"]))
         
         self.optimizer = self.configure_optimizer()
         self.lr_scheduler = self.configure_lr_scheduler()
@@ -141,7 +143,7 @@ class BaseTrainer:
         return base.format(current, total, 100.0 * current / total)
 
     def configure_optimizer(self):
-        optimizer_config = self.logger.config["training"]["optimizer"]
+        optimizer_config = self.config["training"]["optimizer"]
         if optimizer_config["type"] == "sdg":                
             return torch.optim.SGD(
                 params=[p for p in self.model.parameters() if p.requires_grad],
@@ -153,7 +155,7 @@ class BaseTrainer:
              raise ValueError("Invalid optimizer type: {}".format(optimizer_config["type"]))
 
     def configure_lr_scheduler(self):
-        scheduler_config = self.logger.config["training"]["scheduler"]
+        scheduler_config = self.config["training"]["scheduler"]
         if scheduler_config["type"] == "steplr":
             return torch.optim.lr_scheduler.StepLR(
                 step_size= scheduler_config["step_size"],

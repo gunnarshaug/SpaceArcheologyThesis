@@ -1,6 +1,16 @@
+# implementation classes
+classes:
+  dataset: 
+    name: Dataset2022
+    package: data
+    module: datasets
+  logger: 
+    name: WandbLogger
+    package: loggers
+    module: wandb
+
 data:
-  dataset_type: Dataset2022
-  data_dir: datasets/slope
+  dir: replication/data
   batch_size: 10
   num_workers: 4
   transform_opts: 
@@ -13,7 +23,7 @@ model:
   backbone: resnet50
 
 training:
-  epochs: 10
+  epochs: 1
   optimizer:    
     type: sdg
     lr: 0.005
@@ -24,9 +34,10 @@ training:
     step_size: 30
     gamma: 0.1
 
-
-logger:
-  dtm_vs_technique: SLOPE
-  experiment_name: Sarpsborg_Halden_2009
-  experiment_description: This is an experiment used for testing purposes only.
-  save_dir: logging
+experiment:
+  preprocessing: SLOPE
+  name: Testing
+  description: This is an experiment used for testing purposes only.
+  tags:
+   - SLOPE
+   - Test

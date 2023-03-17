@@ -2,16 +2,23 @@ import trainers.base_trainer
 import torchvision
 import utils.model
 import utils.metrics
+import utils.general
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-import loggers.logger 
 
 class Trainer(trainers.base_trainer.BaseTrainer):
     def __init__(self, 
                  device: str,
-                 logger: loggers.logger.Logger,
+                 config: dict,
                 ):
         self._model = None
-        super().__init__(device, logger)
+        logger_config = config["classes"]["logger"]
+
+        logger = utils.general.get_class(**logger_config)(
+            **config["experiment"],
+            config=config["training"]
+        )
+        
+        super().__init__(device, logger, config)
 
     def _train_step(self, inputs, targets):
         output = self.model(inputs, targets)

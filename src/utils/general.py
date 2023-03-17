@@ -6,7 +6,7 @@ import albumentations as a
 import albumentations.pytorch.transforms
 import os
 import logging
-
+import importlib
 
 def setup_logging():
   logging.basicConfig(
@@ -31,17 +31,12 @@ def load_cfg(config_path, is_absolute=False) -> dict:
         config_path = _get_cfg_path(config_path)
         
     config = load_yaml(config_path)
-    # config['timestamp'] = datetime.datetime.now().strftime('%d.%m.%Y_%H.%M.%S')
     return config
-    # return Dict(**config)
-
 
 def ensure_existing_dir(dirname: str) -> None:
     dirname = Path(dirname)
     if not dirname.is_dir():
         dirname.mkdir(parents=True, exist_ok=False)
-
-
 
 def get_transform(dimensions: dict, is_train:bool=False) -> a.Compose:
     transforms = []
@@ -61,3 +56,20 @@ def get_transform(dimensions: dict, is_train:bool=False) -> a.Compose:
         transforms,
         bbox_params=a.BboxParams(format='pascal_voc', label_fields=['class_labels'])
     )
+
+
+def get_class(package:str, module: str, name: str) -> any:
+    """
+    Returns the class object.
+    :param module: the name of the module.
+    :param name: name of the specific implementation class
+    """
+    try:
+        module = importlib.import_module("{}.{}".format(package, module))
+        return getattr(module, name)
+    except Exception as ex:
+        print(ex)
+        raise Exception("Error while trying to find '{}' in module '{}'".format(
+            name,
+            module
+        ))

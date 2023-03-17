@@ -1,29 +1,28 @@
-from torch.utils.data import random_split,  DataLoader
+from torch.utils.data import DataLoader
 from typing import Optional
-import data.datasets as module_data
 import utils.general
 import os
-
+import pathlib
 
 class DataLoaders:
     """
-    DataLoaders used for object detection in space archeology
+    DataLoaders used for object detection.
     """
-    def __init__(self, 
-                  data_dir: str,
-                  dataset_type: str,
-                  transform_opts: str,
+    def __init__(self,
+                  dir: str,
+                  dataset_config: dict,
+                  transform_opts: dict,
                   batch_size: int, 
                   num_workers: int):
         assert "width" in transform_opts
         assert "height" in transform_opts
         
         super().__init__()
-        self.data_dir = data_dir
-        self.dataset_type = dataset_type
+        self.dir = pathlib.Path(dir)
         self.transform_opts = transform_opts
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.dataset_object = utils.general.get_class(**dataset_config)
 
     def setup(self, stage: Optional[str] = None):
         """
@@ -39,23 +38,23 @@ class DataLoaders:
                 self.transform_opts, 
                 is_train=True
             )
-            self.train = getattr(module_data, self.dataset_type)(
-                root_dir=os.path.join(self.data_dir, "train"),
+            
+            self.train = self.dataset_object(
+                root_dir=os.path.join(self.dir, "train"),
                 transform=train_transform
             )
-            self.val = getattr(module_data, self.dataset_type)(
-                root_dir=os.path.join(self.data_dir, "val"),
+            
+            self.val = self.dataset_object(
+                root_dir=os.path.join(self.dir, "val"),
+                transform=val_transform
+            )
+    
+        if stage == "test" or stage is None:
+            self.test = self.dataset_object(
+                root_dir=os.path.join(self.dir, "test"),
                 transform=val_transform
             )
 
-            self.train.transform = train_transform
-            self.val.transform = val_transform
-    
-        if stage == "test" or stage is None:
-            self.test = getattr(module_data, self.dataset_type)(
-                root_dir=os.path.join(self.data_dir, "test"),
-                transform=val_transform
-            )
             
     def train_dataloader(self):
         return DataLoader(dataset=self.train, 

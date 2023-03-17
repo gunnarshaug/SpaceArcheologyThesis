@@ -10,11 +10,13 @@ import utils.general
 class WandbLogger(Logger):
     def __init__(
         self,
-        config:dict,
-        version: str = None,
-        save_dir: str = None,
-        dir: str = None,
+        name: str,
+        description: str,
+        preprocessing: str,
+        config:dict=None,
+        tags: list=[],
         id: str = None,
+        version: str = None,
         anonymous: Optional[bool] = None,
         **kwargs: Any
     ) -> None:
@@ -23,23 +25,19 @@ class WandbLogger(Logger):
                 "You want to use `wandb` logger which is not installed yet,"
                 " install it with `pip install wandb`." 
             )
-
-        self.config = config
         self.timestamp = datetime.datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
-        logger_config = self.config["logger"]
         self._wandb_init: Dict[str, Any] = dict(
-            project=logger_config["experiment_name"],
-            notes=logger_config["experiment_description"],
-            name="run_{0}_{1}".format(
+            project=name,
+            notes=description,
+            name="{0}_{1}".format(
                 self.timestamp,
-                logger_config["dtm_vs_technique"]
+                preprocessing
             ),
-            dir=save_dir or dir,
             id=version or id,
             resume="allow",
             anonymous=("allow" if anonymous else None),
-            tags=[logger_config['dtm_vs_technique']],
-            config=self.config
+            tags=tags,
+            config=config
         )
         self._wandb_init.update(**kwargs)
         self._project = self._wandb_init.get("project")
@@ -51,7 +49,7 @@ class WandbLogger(Logger):
             1: "mound",
             2: "background"
         }
-            
+        
     def log_metrics(self, metrics: dict, step: Optional[int] = None) -> None:
         if step is not None:
             self.experiment.log(metrics, step)
