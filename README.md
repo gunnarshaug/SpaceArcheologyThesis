@@ -1,5 +1,4 @@
-# Deep Learning with Airborne Laser Scanning
-<!-- TABLE OF CONTENTS -->
+# Deep Learning with Airborne LiDAR data
 <details>
   <summary>Table of Contents</summary>
   <ol>
@@ -21,26 +20,17 @@
 
 
 ## About The Project
-
-
-### Key Features
-
+The purpose of this study is to improve previous work conducted on detecting ancient burial mounds in Norway by utilizing a faster R-CNN object detection model with LiDAR-based Digital Terrain Models and identifying methods to reduce false positives.
 
 
 ## Install Dependencies
-<!-- you will need to install all the dependencies such as Pytorch, GDAL, etc., and also have GPU with CUDA driver working -->
 ### Prerequisites
 
 ### Installation
 Here is an example to create an environment from scratch with `anaconda` or `miniconda` 
 ```
-sbatch scripts/env_setup.sh
-```
-Alternatively:
-```
 conda env create --file environment.yml
 ```
-
 
 ## Demo
 
@@ -52,19 +42,19 @@ python src/demo.py
 
 ##  Train
 ### Prepare Data
+The LiDAR datasets were downloaded from [Norwegian Mapping Authority](https://hoydedata.no), and the cultural heritage database from [GeoNorge](https://geonorge.no) where used to annotate the datasets.
+For more detailed information about preparing data: [Preprocessing in ArcGIS Pro](docs/preproecessing.md).
 
 ### Begin Training
-Using slurm scripts:
-```
-sbatch scripts/faster_rcnn.sh
-```
 
-Alternatively: 
 ```
 python src/train.py
 ```
 Some key arguments:
-- `--config`: Name of the configuration file, assuming it is located within the `config` folder. Default: `faster_rcnn.yml`.
+- `--config`: Name of the configuration file, assuming it is located within the `config` folder. 
+  Default: `faster_rcnn.yml`.
+
+
 
 ## Previous Work
 
