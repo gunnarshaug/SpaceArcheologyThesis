@@ -8,6 +8,14 @@ classes:
     package: loggers
     module: wandb
 
+experiment:
+  preprocessing: SLOPE
+  name: Testing
+  description: This is an experiment used for testing purposes only.
+  tags:
+   - SLOPE
+   - Test
+
 data:
   dir: datasets/unit_testing/data
   batch_size: 10
@@ -15,11 +23,6 @@ data:
   transform_opts: 
     width: 224
     height: 224
-
-model:
-  type: faster-rcnn
-  pre_trained: True
-  backbone: resnet50
 
 training:
   epochs: 1
@@ -32,11 +35,3 @@ training:
     type: steplr
     step_size: 30
     gamma: 0.1
-
-experiment:
-  preprocessing: SLOPE
-  name: Testing
-  description: This is an experiment used for testing purposes only.
-  tags:
-   - SLOPE
-   - Test

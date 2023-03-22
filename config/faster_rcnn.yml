@@ -1,4 +1,10 @@
-# implementation classes
+experiment:
+  preprocessing: SLOPE
+  name: ResNet50 Transfer Learning on Faster R-CNN
+  description: ---
+  tags:
+   - SLOPE
+
 classes:
   dataset: 
     name: Dataset2022
@@ -17,11 +23,6 @@ data:
     width: 224
     height: 224
 
-model:
-  type: faster-rcnn
-  pre_trained: True
-  backbone: resnet50
-
 training:
   epochs: 1
   optimizer:    
@@ -33,11 +34,3 @@ training:
     type: steplr
     step_size: 30
     gamma: 0.1
-
-experiment:
-  preprocessing: SLOPE
-  name: Testing
-  description: This is an experiment used for testing purposes only.
-  tags:
-   - SLOPE
-   - Test

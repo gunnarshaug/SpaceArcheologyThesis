@@ -9,8 +9,6 @@ import data.dataloaders
 
 def parse_args():
   parser = argparse.ArgumentParser(description='Pytorch Faster R-CNN')
-  parser.add_argument('--seed', type=int, default=1, metavar='S',
-                      help='random seed (default: 1)')
   parser.add_argument('--config',
                       help='location of config file',
                       default='faster_rcnn.yml', type=str)
@@ -33,7 +31,9 @@ def main():
   if not use_cuda:
     print("WARNING: running training with CPU.")
   
-  torch.manual_seed(args.seed)
+  
+  seed = config.get("seed", 1)
+  torch.manual_seed(seed)
 
   device = torch.device("cuda" if use_cuda else "cpu")
 
