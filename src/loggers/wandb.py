@@ -10,9 +10,9 @@ import utils.general
 class WandbLogger(Logger):
     def __init__(
         self,
+        project: str,
         name: str,
         description: str,
-        preprocessing: str,
         config:dict=None,
         tags: list=[],
         id: str = None,
@@ -27,11 +27,11 @@ class WandbLogger(Logger):
             )
         self.timestamp = datetime.datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
         self._wandb_init: Dict[str, Any] = dict(
-            project=name,
+            project=project,
             notes=description,
             name="{0}_{1}".format(
-                self.timestamp,
-                preprocessing
+                name,
+                self.timestamp
             ),
             id=version or id,
             resume="allow",
@@ -46,8 +46,7 @@ class WandbLogger(Logger):
         self._id = self._wandb_init.get("id")
         self._experiment = None
         self.class_id_to_label = {
-            1: "mound",
-            2: "background"
+            1: "mound"
         }
         
     def log_metrics(self, metrics: dict, step: Optional[int] = None) -> None:
@@ -58,7 +57,6 @@ class WandbLogger(Logger):
 
     def log_image(self, image, predictions, boxes_ground_truth, key="images"):
 
-        # wandb_image = [self._generate_bounding_boxes(image, bboxes)]
         boxes = {
             "predictions":
             {
@@ -118,6 +116,6 @@ class WandbLogger(Logger):
     def save_model(self, model):
         model_dir = os.path.join("models", self.experiment.project, self.experiment.name)
         utils.general.ensure_existing_dir(model_dir)
-        filename = "{}_{}.pt".format(self.timestamp, self.experiment.id)
+        filename = "{}.pt".format(self.experiment.name)
         torch.save(model, os.path.join(model_dir, filename))
         
