@@ -1,13 +1,13 @@
 experiment:
-  preprocessing: SLOPE
-  name: ResNet50 Transfer Learning on Faster R-CNN
+  project: ResNet50 Transfer Learning on Faster R-CNN
+  name: SLOPE_Sarpsborg_2017
   description: ---
   tags:
    - SLOPE
 
 classes:
   dataset: 
-    name: Dataset2022
+    name: PascalVOCDataset
     package: data
     module: datasets
   logger: 
@@ -16,7 +16,12 @@ classes:
     module: wandb
 
 data:
-  dir: replication/data
+  test_dirs: 
+    - datasets/testing/data/test
+  train_dirs:
+    - datasets/testing/data/train
+
+dataloader:
   batch_size: 10
   num_workers: 4
   transform_opts: 
@@ -24,6 +29,7 @@ data:
     height: 224
 
 training:
+  seed: 1
   epochs: 1
   optimizer:    
     type: sdg

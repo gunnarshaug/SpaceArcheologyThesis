@@ -11,13 +11,17 @@ The following explains the format of the configuration file used for training.
   - `description`: Some notes to remember about the project.
   - `tags`: Specifically for wandb logging. Can be used to search/filter in the dashboard. 
 
-* `data`: contains information about where the datasets are located, batch_size, num_workers and transform options.
-  - `dir`: The path to the directory where the datasets are located. 
+* `data`: contains information about where the datasets are located.
+  - `train_dirs`: The path to the directories where the datasets are located. 
+  - `test_dirs`: The path to the directories where the datasets are located. 
+  
+* `dataloader`: contains information to configure dataloaders batch_size, num_workers and transform options.
   - `batch_size`
   - `num_workers`
   - `transform_opts`: includes the `width` and `height` of the transformed images. 
 
 * `training`: Contains information related to training a model (hyperparameters)
+  - `seed` (optional): Used to support reproducibility. See [https://pytorch.org/docs/stable/notes/randomness.html](https://pytorch.org/docs/stable/notes/randomness.html). Default value is 1.
   - `epochs`
   - `optimizer`: The current implementation supports stocastic gradient decent. 
   - `scheduler`: The current implementation supports steplr
@@ -27,14 +31,14 @@ The following explains the format of the configuration file used for training.
   - `package`: Name of the python package.
   - `module`: Name of the python module.
 
-* `seed` (optional): Used to support reproducibility. See [https://pytorch.org/docs/stable/notes/randomness.html](https://pytorch.org/docs/stable/notes/randomness.html). Default value is 1.
+
 
 ### Example
 Example using `PascalVOCDataset` and `WandbLogger` as specific implementation classes. Remember to specify what package and module they belong to.
 ```
 classes:
   dataset: 
-    name: PascalVOCDataset
+    name: Dataset2022
     package: data
     module: datasets
   logger: 
@@ -42,16 +46,13 @@ classes:
     package: loggers
     module: wandb
 
-experiment:
-  preprocessing: SLOPE
-  name: Testing
-  description: This is an experiment used for testing purposes only.
-  tags:
-   - SLOPE
-   - Test
-
 data:
-  dir: datasets/unit_testing/data
+  test_dirs: 
+    - replication/data
+  train_dirs:
+    - replication/data
+
+dataloader:
   batch_size: 10
   num_workers: 4
   transform_opts: 
@@ -59,6 +60,7 @@ data:
     height: 224
 
 training:
+  seed: 1
   epochs: 1
   optimizer:    
     type: sdg
@@ -69,6 +71,4 @@ training:
     type: steplr
     step_size: 30
     gamma: 0.1
-
-seed: 1
 ```

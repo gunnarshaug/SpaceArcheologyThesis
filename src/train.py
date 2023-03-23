@@ -31,8 +31,8 @@ def main():
   if not use_cuda:
     print("WARNING: running training with CPU.")
   
-  
-  seed = config.get("seed", 1)
+  training_config = config["training"]
+  seed = training_config.get("seed", 1)
   torch.manual_seed(seed)
 
   device = torch.device("cuda" if use_cuda else "cpu")
@@ -44,12 +44,14 @@ def main():
   
   data_loaders = data.dataloaders.DataLoaders(
     dataset_config=config["classes"]["dataset"],
-    **config["data"]
+    **config["dataloader"]
   )
 
-  trainer.train(data_loaders)
+  for dir in config["data"]["train_dirs"]:
+    trainer.train(dir, data_loaders)
   
-  trainer.test(data_loaders)
+  for dir in config["data"]["test_dirs"]:
+    trainer.test(dir, data_loaders)
 
 if __name__ == "__main__":
   print(torch.cuda.is_available())
