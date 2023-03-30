@@ -4,7 +4,7 @@ import argparse
 import utils.metrics
 import utils.general
 import utils.model
-import trainers.trainer
+import trainers.faster_rcnn
 import data.dataloaders
 
 def parse_args():
@@ -37,21 +37,20 @@ def main():
 
   device = torch.device("cuda" if use_cuda else "cpu")
 
-  trainer = trainers.trainer.Trainer(
+  trainer = trainers.faster_rcnn.Trainer(
     config=config,
     device=device
   )
   
   data_loaders = data.dataloaders.DataLoaders(
     dataset_config=config["classes"]["dataset"],
+    **config["data"],
     **config["dataloader"]
   )
-
-  for dir in config["data"]["train_dirs"]:
-    trainer.train(dir, data_loaders)
   
-  for dir in config["data"]["test_dirs"]:
-    trainer.test(dir, data_loaders)
+  trainer.train(data_loaders)
+  
+  trainer.test(data_loaders)
 
 if __name__ == "__main__":
   print(torch.cuda.is_available())

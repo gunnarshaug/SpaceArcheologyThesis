@@ -11,7 +11,7 @@ class BaseTrainer:
                  device:str,
                  logger: Logger,
                  config: dict,
-                 save_model: bool=True):
+                 checkpoint_dir: str):
         self.device = device
         self.logger = logger
         self.train_loss = utils.metrics.Averager()
@@ -21,7 +21,7 @@ class BaseTrainer:
         self.epochs = self.config["training"]["epochs"]
         self.log_step = int(np.sqrt(self.config["dataloader"]["batch_size"]))
         self.train_length = 0
-        self.save_model = save_model
+        self.checkpoint_dir = checkpoint_dir
         
         # self.log_image_batch_idx = np.random.randint(0, self.logger["batch_size"])
         self.log_image_batch_idx = 0
@@ -52,15 +52,14 @@ class BaseTrainer:
     def model(self):
         raise NotImplementedError
     
-    
-    def train(self, data_dir:str, data_loaders: DataLoaders) -> None:
+    def train(  self, 
+                data_loaders: DataLoaders) -> None:
         """
         Training logic.
         """
-        data_dir = Path(data_dir)    
-        data_loaders.setup(data_dir, "train")
+        data_loaders.setup("train")
         self.train_iteration += 1
-        print("TRAIN ITERATION {}".format(self.train_iteration))
+        self.logger.info("TRAIN ITERATION {}".format(self.train_iteration))
 
         for epoch in range(1, self.epochs + 1):
             self.train_loss.reset()      
@@ -71,7 +70,7 @@ class BaseTrainer:
             self.lr_scheduler.step()
             
             
-            print("Val set: Precision: {} Recall: {}\n".format(
+            self.logger.info("Val set: Precision: {} Recall: {}\n".format(
                 self.val_metrics.precision, 
                 self.val_metrics.recall))
 
@@ -82,8 +81,8 @@ class BaseTrainer:
                 "Train/Recall": self.val_metrics.recall,
                 "Train/Precision": self.val_metrics.precision,
             })
-        if self.save_model:
-            self.logger.save_model(self.model)
+            
+            self._save_checkpoint(epoch, save_best=self.val_metrics.is_improving)
         
     def test(self, data_dir: str, data_loaders: DataLoaders):
         data_dir = Path(data_dir)    
@@ -92,7 +91,7 @@ class BaseTrainer:
         self.model.eval() 
 
         self.test_iteration += 1
-        print("TEST ITERATION {}".format(self.test_iteration))
+        self.logger.info("TEST ITERATION {}".format(self.test_iteration))
 
         for batch_idx, (images, targets ) in enumerate(data_loaders.test_dataloader):
             images = list(image.to(self.device) for image in images)
@@ -133,7 +132,7 @@ class BaseTrainer:
             self.optimizer.step()
             
             if (batch_idx+1) % self.log_step == 0:
-                print("Train Epoch: {} {} Loss: {:.6f}".format(
+                self.logger.info("Train Epoch: {} {} Loss: {:.6f}".format(
                     epoch,
                     self._train_progress_text(batch_idx+1),
                     self.train_loss.value))
@@ -178,3 +177,17 @@ class BaseTrainer:
             )
         else:
              raise ValueError("Invalid learning rate scheduler type: {}".format(scheduler_config["type"]))
+
+    def _save_checkpoint(self, epoch, save_best=False):
+        """
+        Saving checkpoints
+        :param epoch: current epoch number
+        :param save_best: if True, rename the saved checkpoint to 'model_best.pth'
+        """
+        filename = str(self.checkpoint_dir / 'checkpoint-epoch{}.pth'.format(epoch))
+        torch.save(self.model, filename)
+        self.logger.info("Saving checkpoint: {} ...".format(filename))
+        if save_best:
+            best_path = str(self.checkpoint_dir / 'model_best.pth')
+            torch.save(self.model, best_path)
+            self.logger.info("Saving current best: model_best.pth ...")

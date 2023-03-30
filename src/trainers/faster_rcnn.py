@@ -1,4 +1,4 @@
-import trainers.base_trainer
+import trainers.base
 import torchvision
 import utils.model
 import utils.metrics
@@ -6,7 +6,7 @@ import utils.general
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection import fasterrcnn_resnet50_fpn, FasterRCNN_ResNet50_FPN_Weights
 
-class Trainer(trainers.base_trainer.BaseTrainer):
+class Trainer(trainers.base.BaseTrainer):
     def __init__(self, 
                  device: str,
                  config: dict,
@@ -19,7 +19,9 @@ class Trainer(trainers.base_trainer.BaseTrainer):
             config=config["training"]
         )
         
-        super().__init__(device, logger, config)
+        checkpoint_dir = config.get("model", {}).get("checkpoint_dir", "checkpoints")
+        
+        super().__init__(device, logger, config, checkpoint_dir=checkpoint_dir)
 
     def _train_step(self, inputs, targets):
         output = self.model(inputs, targets)
@@ -62,13 +64,17 @@ class Trainer(trainers.base_trainer.BaseTrainer):
     @property
     def model(self):
         if(self._model is None):
-            self._model = get_object_detection_model()              
+            self._model = _get_object_detection_model()              
             self._model.to(self.device)
         return self._model
         
-def get_object_detection_model():
-    model = fasterrcnn_resnet50_fpn(weights=FasterRCNN_ResNet50_FPN_Weights.DEFAULT)
+def _get_object_detection_model(num_classes: int=2):
+    model = fasterrcnn_resnet50_fpn(
+                pretrained=True,
+                weights=FasterRCNN_ResNet50_FPN_Weights.DEFAULT,
+                num_classes=num_classes
+            )
 
     in_features = model.roi_heads.box_predictor.cls_score.in_features
-    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, 2)
+    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
     return model
