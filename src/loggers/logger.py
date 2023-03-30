@@ -10,6 +10,9 @@ class Logger(ABC):
     def log_image(self,  images, bboxes, key):
         raise NotImplementedError
     
-    @abstractmethod
-    def save_model(self, model):
-        raise NotImplementedError
+    def info(self, text: str):
+        """"
+        Used to print information to the console. 
+        :param text: the information text.
+        """
+        print(text)

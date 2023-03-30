@@ -112,10 +112,3 @@ class WandbLogger(Logger):
                 self._experiment.define_metric("Train/Recall", summary="max")
 
         return self._experiment
-    
-    def save_model(self, model):
-        model_dir = os.path.join("models", self.experiment.project, self.experiment.name)
-        utils.general.ensure_existing_dir(model_dir)
-        filename = "{}.pt".format(self.experiment.name)
-        torch.save(model, os.path.join(model_dir, filename))
-        

@@ -4,7 +4,6 @@ from loggers.logger import Logger
 import numpy as np
 from abc import abstractproperty, abstractmethod
 from data.dataloaders import DataLoaders
-from pathlib import Path
 
 class BaseTrainer:
     def __init__(self,
@@ -57,7 +56,6 @@ class BaseTrainer:
         """
         Training logic.
         """
-        data_loaders.setup("train")
         self.train_iteration += 1
         self.logger.info("TRAIN ITERATION {}".format(self.train_iteration))
 
@@ -84,10 +82,7 @@ class BaseTrainer:
             
             self._save_checkpoint(epoch, save_best=self.val_metrics.is_improving)
         
-    def test(self, data_dir: str, data_loaders: DataLoaders):
-        data_dir = Path(data_dir)    
-        data_loaders.setup(data_dir, "test")
-        
+    def test(self, data_loaders: DataLoaders):                
         self.model.eval() 
 
         self.test_iteration += 1

@@ -6,13 +6,18 @@ class Metrics:
     self.fp = 0
     self.fn = 0
     self.counter = 0
+    self.is_improving = False
 
   def update(self, iou: torch.Tensor):
+    precision_prev = self.precision
+    
     tp, fp, fn = self._compute_metrics(iou)
     self.tp += tp
     self.fp += fp
     self.fn += fn
     self.counter += 1
+    
+    self.is_improving = self.precision >= precision_prev
 
   @property
   def precision(self) -> float:
