@@ -1,5 +1,6 @@
 import torch
 import utils.metrics
+import utils.general
 from loggers.logger import Logger
 import numpy as np
 from abc import abstractproperty, abstractmethod
@@ -23,10 +24,7 @@ class BaseTrainer:
         self.checkpoint_dir = checkpoint_dir
         
         # self.log_image_batch_idx = np.random.randint(0, self.logger["batch_size"])
-        self.log_image_batch_idx = 0
-        self.train_iteration = 0 
-        self.test_iteration = 0
-        
+        self.log_image_batch_idx = 0        
     @abstractmethod
     def _train_step(self, inputs, labels):
         """
@@ -51,13 +49,10 @@ class BaseTrainer:
     def model(self):
         raise NotImplementedError
     
-    def train(  self, 
-                data_loaders: DataLoaders) -> None:
+    def train(self, data_loaders: DataLoaders) -> None:
         """
         Training logic.
         """
-        self.train_iteration += 1
-        self.logger.info("TRAIN ITERATION {}".format(self.train_iteration))
 
         for epoch in range(1, self.epochs + 1):
             self.train_loss.reset()      
@@ -74,7 +69,6 @@ class BaseTrainer:
 
             self.logger.log_metrics({
                 "Epoch": epoch,
-                "Train/Iteration": self.train_iteration,
                 "Train/Loss": self.train_loss.value,
                 "Train/Recall": self.val_metrics.recall,
                 "Train/Precision": self.val_metrics.precision,
@@ -85,9 +79,6 @@ class BaseTrainer:
     def test(self, data_loaders: DataLoaders):                
         self.model.eval() 
 
-        self.test_iteration += 1
-        self.logger.info("TEST ITERATION {}".format(self.test_iteration))
-
         for batch_idx, (images, targets ) in enumerate(data_loaders.test_dataloader):
             images = list(image.to(self.device) for image in images)
             targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
@@ -97,9 +88,7 @@ class BaseTrainer:
                 for idx, image in enumerate(images):     
                     self.logger.log_image(image, boxes[idx], targets[idx])
             
-        self.logger.log_metrics({
-            "Test/Iteration": self.test_iteration,
-            "Test/NoImages": self.test_metrics.counter,
+        self.logger.log_metrics({            "Test/NoImages": self.test_metrics.counter,
             "Test/Recall": self.test_metrics.recall,
             "Test/Precision": self.test_metrics.precision,
             "Test/FalsePositives": self.test_metrics.false_positives,
@@ -177,12 +166,15 @@ class BaseTrainer:
         """
         Saving checkpoints
         :param epoch: current epoch number
-        :param save_best: if True, rename the saved checkpoint to 'model_best.pth'
+        :param save_best: if True, rename the saved checkpoint to 'model_best.pt'
         """
-        filename = str(self.checkpoint_dir / 'checkpoint-epoch{}.pth'.format(epoch))
-        torch.save(self.model, filename)
-        self.logger.info("Saving checkpoint: {} ...".format(filename))
+        
+        utils.general.ensure_existing_dir(self.checkpoint_dir)
+        file_path = "{}/checkpoint-epoch{}.pt".format(self.checkpoint_dir,epoch)
+        torch.save(self.model, file_path)
+        self.logger.info("Saving checkpoint: {} ...".format(file_path))
+
         if save_best:
-            best_path = str(self.checkpoint_dir / 'model_best.pth')
+            best_path = "{}/model_best.pt".format(self.checkpoint_dir)
             torch.save(self.model, best_path)
-            self.logger.info("Saving current best: model_best.pth ...")
+            self.logger.info("Saving current best: model_best.pt ...")

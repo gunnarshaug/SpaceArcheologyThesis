@@ -4,7 +4,7 @@ import utils.model
 import utils.metrics
 import utils.general
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from torchvision.models.detection import fasterrcnn_resnet50_fpn, FasterRCNN_ResNet50_FPN_Weights
+import torchvision.models.detection
 
 class Trainer(trainers.base.BaseTrainer):
     def __init__(self, 
@@ -69,11 +69,7 @@ class Trainer(trainers.base.BaseTrainer):
         return self._model
         
 def _get_object_detection_model(num_classes: int=2):
-    model = fasterrcnn_resnet50_fpn(
-                pretrained=True,
-                weights=FasterRCNN_ResNet50_FPN_Weights.DEFAULT,
-                num_classes=num_classes
-            )
+    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
 
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
