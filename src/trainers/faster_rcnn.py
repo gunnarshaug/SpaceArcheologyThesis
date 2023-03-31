@@ -1,10 +1,9 @@
 import trainers.base
 import torchvision
-import utils.model
 import utils.metrics
 import utils.general
-from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 import torchvision.models.detection
+from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 class Trainer(trainers.base.BaseTrainer):
     def __init__(self, 
@@ -23,16 +22,16 @@ class Trainer(trainers.base.BaseTrainer):
         
         super().__init__(device, logger, config, checkpoint_dir=checkpoint_dir)
 
-    def _train_step(self, inputs, targets):
+    def train_step(self, inputs, targets):
         output = self.model(inputs, targets)
         losses = sum(loss for loss in output.values())
 
         return losses
     
-    def _validate_step(self, inputs, targets):
+    def validate_step(self, inputs, targets):
         output = self.model(inputs)
         for i, prediction in enumerate(output):
-            nms_prediction = utils.model.apply_nms(prediction, iou_thresh=0.1)
+            nms_prediction = utils.general.apply_nms(prediction, iou_thresh=0.1)
             ground_truth = targets[i]
 
             iou = torchvision.ops.box_iou(
@@ -47,11 +46,11 @@ class Trainer(trainers.base.BaseTrainer):
             
             self.val_metrics.update(iou)
             
-    def _test_step(self, inputs, targets):
+    def test_step(self, inputs, targets):
         output = self.model(inputs)
         boxes = []
         for i, prediction in enumerate(output):
-            nms_prediction = utils.model.apply_nms(prediction, iou_thresh=0.1)
+            nms_prediction = utils.general.apply_nms(prediction, iou_thresh=0.1)
             ground_truth = targets[i]
             iou = torchvision.ops.box_iou(
                 nms_prediction['boxes'].to(self.device),

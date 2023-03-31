@@ -1,6 +1,8 @@
 from torch.utils.data import DataLoader, ConcatDataset, Dataset
 import utils.general
 import pathlib 
+import albumentations as a
+import albumentations.pytorch.transforms
 
 class DataLoaders:
     """
@@ -42,7 +44,7 @@ class DataLoaders:
 
                 
     def _generate_dataset(self, dirs: list, is_train: bool) -> Dataset:
-        transform = utils.general.get_transform(
+        transform = _get_transform(
             self.transform_opts, 
             is_train=is_train
         )
@@ -86,3 +88,23 @@ def _collate_fn(batch) -> tuple:
     copy from https://github.com/pytorch/vision/blob/main/references/detection/utils.py
     """
     return tuple(zip(*batch))
+
+
+def _get_transform(dimensions: dict, is_train:bool=False) -> a.Compose:
+    transforms = []
+    transforms.append(a.Resize(dimensions["width"], dimensions["height"]))
+
+    if is_train:
+        transforms.append(a.HorizontalFlip(p=0.5))
+        transforms.append(a.RandomBrightnessContrast(p=0.2))
+
+    transforms.append(
+        a.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    )
+
+    transforms.append(albumentations.pytorch.transforms.ToTensorV2())
+
+    return a.Compose(
+        transforms,
+        bbox_params=a.BboxParams(format='pascal_voc', label_fields=['class_labels'])
+    )

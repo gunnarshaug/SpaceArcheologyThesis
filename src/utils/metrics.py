@@ -33,13 +33,6 @@ class Metrics:
     else: 
       return self.tp / (self.tp + self.fn)
 
-  # @property
-  # def accuracy(self) -> float:
-  #   if (self.tp + self.fn) == 0:
-  #     return 0
-  #   else: 
-  #     return (self.tp + self.tn) / (self.tp + self.tn + self.fn + self.fp)
-
   @property
   def true_positives(self)-> int:
     return self.tp

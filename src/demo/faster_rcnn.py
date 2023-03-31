@@ -5,10 +5,7 @@ import torch
 import numpy as np
 import albumentations as a
 import albumentations.pytorch.transforms
-import utils.model
-import argparse
 import utils.general
-# from demo.faster_rcnn_demo import FasterRCNNDemo
 import demo.calculate_results
 
 """
@@ -111,7 +108,7 @@ class Demo:
         transformed_image = self.transform(image=image_numpy)['image']
         with torch.no_grad():
           prediction = self.model([transformed_image.to(self.device)])[0]
-          nms_prediction = utils.model.apply_nms(prediction, iou_thresh=0.1)
+          nms_prediction = utils.general.apply_nms(prediction, iou_thresh=0.1)
           bboxes[i][j] = nms_prediction['boxes']
           for box in nms_prediction['boxes']:
             x_min, y_min, x_max, y_max = box

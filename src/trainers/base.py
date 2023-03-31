@@ -26,27 +26,37 @@ class BaseTrainer:
         # self.log_image_batch_idx = np.random.randint(0, self.logger["batch_size"])
         self.log_image_batch_idx = 0        
     @abstractmethod
-    def _train_step(self, inputs, labels):
+    def train_step(self, inputs, labels):
         """
         Training logic for one batch.
         """
         raise NotImplementedError
     
     @abstractmethod
-    def _validate_step(self, inputs, targets):
+    def validate_step(self, inputs, targets):
         """
-        Validation logic.
+        Validation logic for one batch.
         """
         raise NotImplementedError
     @abstractmethod
-    def _test_step(self, inputs, targets):
+    def test_step(self, inputs, targets):
         """
-        Testing logic.
+        Testing logic for one batch.
         """
         raise NotImplementedError
     
+    @abstractmethod
+    def on_train_end(self):
+        """
+        Additional logic after training ends.
+        """
+        pass
+    
     @abstractproperty
     def model(self):
+        """
+        Returns the deep learning model.
+        """
         raise NotImplementedError
     
     def train(self, data_loaders: DataLoaders) -> None:
@@ -75,20 +85,25 @@ class BaseTrainer:
             })
             
             self._save_checkpoint(epoch, save_best=self.val_metrics.is_improving)
+            
+        self.on_train_end()
+        
         
     def test(self, data_loaders: DataLoaders):                
         self.model.eval() 
+        test_loader = data_loaders.test_dataloader
+        self.logger.log_metrics({"NoImages/Test": len(test_loader)})
 
-        for batch_idx, (images, targets ) in enumerate(data_loaders.test_dataloader):
+        for batch_idx, (images, targets ) in enumerate(test_loader):
             images = list(image.to(self.device) for image in images)
             targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
-            boxes = self._test_step(images, targets)
+            boxes = self.test_step(images, targets)
                         
             if batch_idx == self.log_image_batch_idx and boxes is not None:
                 for idx, image in enumerate(images):     
                     self.logger.log_image(image, boxes[idx], targets[idx])
             
-        self.logger.log_metrics({            "Test/NoImages": self.test_metrics.counter,
+        self.logger.log_metrics({
             "Test/Recall": self.test_metrics.recall,
             "Test/Precision": self.test_metrics.precision,
             "Test/FalsePositives": self.test_metrics.false_positives,
@@ -98,14 +113,15 @@ class BaseTrainer:
             
             
     def _train_epoch(self, epoch, dataloader):
-        self.model.train()
+        self.logger.log_metrics({"NoImages/Train": len(dataloader)})
 
+        self.model.train()
         for batch_idx, (inputs, labels) in enumerate(dataloader):
             self.optimizer.zero_grad()
             
             images = list(image.to(self.device) for image in inputs)
             targets = [{k: v.to(self.device) for k, v in t.items()} for t in labels]
-            loss = self._train_step(images, targets)
+            loss = self.train_step(images, targets)
             
             self.train_loss.update(loss.item())
             
@@ -123,14 +139,15 @@ class BaseTrainer:
                 
              
     def _validate_epoch(self, epoch, dataloader):
-        self.model.eval()
+        self.logger.log_metrics({"NoImages/Val": len(dataloader)})
 
+        self.model.eval()
         with torch.no_grad():
             for batch_idx, (inputs, labels) in enumerate(dataloader):
                 images = list(image.to(self.device) for image in inputs)
                 targets = [{k: v.to(self.device) for k, v in t.items()} for t in labels]
                
-                self._validate_step(images, targets)
+                self.validate_step(images, targets)
                                 
     def _train_progress_text(self, batch_idx):
         base = "[{}/{} ({:.0f}%)]"

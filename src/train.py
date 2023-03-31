@@ -1,9 +1,8 @@
-import torch
 import os
+import torch
 import argparse
 import utils.metrics
 import utils.general
-import utils.model
 import trainers.faster_rcnn
 import data.dataloaders
 
