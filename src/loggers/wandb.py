@@ -3,9 +3,6 @@ from typing import Optional, Any, Dict
 import wandb
 from loggers.logger import Logger
 import datetime
-import os
-import torch
-import utils.general
 
 class WandbLogger(Logger):
     def __init__(
@@ -45,38 +42,37 @@ class WandbLogger(Logger):
         self._name = self._wandb_init.get("name")
         self._id = self._wandb_init.get("id")
         self._experiment = None
-        self.class_id_to_label = {
-            1: "mound"
-        }
-        
+    
     def log_metrics(self, metrics: dict, step: Optional[int] = None) -> None:
         if step is not None:
             self.experiment.log(metrics, step)
         else:
             self.experiment.log(metrics)
 
-    def log_image(self, image, predictions, boxes_ground_truth, key="images"):
-
-        boxes = {
+    def log_image(self, image, predicted_boxes, prediction_scores, ground_truth_boxes):
+        boxes_predicted =  {
             "predictions":
             {
-                "box_data": self._get_bounding_boxes(predictions["boxes"], 1),
-                "class_labels" : self.class_id_to_label
-            },
-            "ground_truth":
-            {
-                "box_data": self._get_bounding_boxes(boxes_ground_truth["boxes"], 1),
-                "class_labels" : self.class_id_to_label 
+                "box_data": self._get_bounding_boxes(predicted_boxes, prediction_scores),
             }
         }
-        wandb_image = [wandb.Image(image, boxes=boxes)]
+        boxes_gt = {
+            "ground_truth":
+            {
+                "box_data": self._get_bounding_boxes(ground_truth_boxes)
+            }
+        }
+        
+        wandb_image_predicted = [wandb.Image(image, boxes=boxes_predicted)]
+        wandb_image_gt = [wandb.Image(image, boxes=boxes_gt)]
 
-        self.experiment.log({str(key): wandb_image})
+        self.experiment.log({"Images/Predicted": wandb_image_predicted})
+        self.experiment.log({"Images/GroundTruth": wandb_image_gt})
 
-    def _get_bounding_boxes(self, boxes, class_id):
+    def _get_bounding_boxes(self, boxes, scores=None, class_id=1):
 
         all_boxes = []
-        for box in boxes:
+        for idx, box in enumerate(boxes):
             x_min, y_min, x_max, y_max = box
             box_data = {
                 "position": {
@@ -86,7 +82,7 @@ class WandbLogger(Logger):
                     "maxY": float(y_max)
                 },
                 "class_id" : class_id,
-                "box_caption": self.class_id_to_label[class_id],
+                "box_caption": format(scores[idx].item(), ".2f") if scores is not None else "",
                 "domain" : "pixel"
             }
             all_boxes.append(box_data)

@@ -8,19 +8,14 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 class Trainer(trainers.base.BaseTrainer):
     def __init__(self, 
                  device: str,
-                 config: dict,
-                ):
-        self._model = None
-        logger_config = config["classes"]["logger"]
-
-        logger = utils.general.get_class(**logger_config)(
-            **config["experiment"],
-            config=config["training"]
-        )
+                 config: dict):
         
+        self.image_log_count = 0
+        self._model = None
+                
         checkpoint_dir = config.get("model", {}).get("checkpoint_dir", "checkpoints")
         
-        super().__init__(device, logger, config, checkpoint_dir=checkpoint_dir)
+        super().__init__(device, config, checkpoint_dir=checkpoint_dir)
 
     def train_step(self, inputs, targets):
         output = self.model(inputs, targets)
@@ -44,20 +39,34 @@ class Trainer(trainers.base.BaseTrainer):
             if predicted_boxes_count == 0 and gt_boxes_count == 0:
                 continue
             
-            self.val_metrics.update(iou)
-            
     def test_step(self, inputs, targets):
         output = self.model(inputs)
         boxes = []
         for i, prediction in enumerate(output):
             nms_prediction = utils.general.apply_nms(prediction, iou_thresh=0.1)
             ground_truth = targets[i]
+            
+            # IoU measures the overlap between two bounding boxes.
             iou = torchvision.ops.box_iou(
                 nms_prediction['boxes'].to(self.device),
                 ground_truth['boxes'].to(self.device)
             )
             boxes.append(nms_prediction)
             self.test_metrics.update(iou)
+            
+            self.val_metrics.update(iou)
+            
+            if self.image_log_count <= 10: 
+                self.image_log_count += 1
+                parameters = {
+                    "image": inputs[i],
+                    "predicted_boxes":  nms_prediction["boxes"],
+                    "ground_truth_boxes": ground_truth["boxes"],
+                    "prediction_scores":nms_prediction["scores"]
+                }
+                self.has_logged_image = True
+                self.logger.log_image(**parameters)
+            
         return boxes
 
     @property

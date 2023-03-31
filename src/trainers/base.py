@@ -23,8 +23,13 @@ class BaseTrainer:
         self.train_length = 0
         self.checkpoint_dir = checkpoint_dir
         
-        # self.log_image_batch_idx = np.random.randint(0, self.logger["batch_size"])
-        self.log_image_batch_idx = 0        
+        logger_config = self.config["classes"]["logger"]
+
+        self.logger = utils.general.get_class(**logger_config)(
+            **self.config["experiment"],
+            config=self.config["training"]
+        )
+        
     @abstractmethod
     def train_step(self, inputs, labels):
         """
@@ -63,7 +68,12 @@ class BaseTrainer:
         """
         Training logic.
         """
-
+        self.logger.log_metrics({
+            "NoImages/Train": data_loaders.train_length,
+            "NoImages/Val": data_loaders.val_length
+        })
+        self.train_length = data_loaders.train_length
+        
         for epoch in range(1, self.epochs + 1):
             self.train_loss.reset()      
 
@@ -90,22 +100,20 @@ class BaseTrainer:
         
         
     def test(self, data_loaders: DataLoaders):                
+        self.logger.log_metrics({
+            "NoImages/Test": data_loaders.test_length
+        })
+        
         self.model.eval() 
-        test_loader = data_loaders.test_dataloader
-        self.logger.log_metrics({"NoImages/Test": len(test_loader)})
-
-        for batch_idx, (images, targets ) in enumerate(test_loader):
+        for batch_idx, (images, targets ) in enumerate(data_loaders.test_dataloader):
             images = list(image.to(self.device) for image in images)
             targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
-            boxes = self.test_step(images, targets)
-                        
-            if batch_idx == self.log_image_batch_idx and boxes is not None:
-                for idx, image in enumerate(images):     
-                    self.logger.log_image(image, boxes[idx], targets[idx])
-            
+            _ = self.test_step(images, targets)
+                                    
         self.logger.log_metrics({
             "Test/Recall": self.test_metrics.recall,
             "Test/Precision": self.test_metrics.precision,
+            "Test/F1_Score": self.test_metrics.f1_score,
             "Test/FalsePositives": self.test_metrics.false_positives,
             "Test/FalseNegatives": self.test_metrics.false_negatives,
             "Test/TruePositives": self.test_metrics.true_positives,    
@@ -113,8 +121,6 @@ class BaseTrainer:
             
             
     def _train_epoch(self, epoch, dataloader):
-        self.logger.log_metrics({"NoImages/Train": len(dataloader)})
-
         self.model.train()
         for batch_idx, (inputs, labels) in enumerate(dataloader):
             self.optimizer.zero_grad()
@@ -139,8 +145,6 @@ class BaseTrainer:
                 
              
     def _validate_epoch(self, epoch, dataloader):
-        self.logger.log_metrics({"NoImages/Val": len(dataloader)})
-
         self.model.eval()
         with torch.no_grad():
             for batch_idx, (inputs, labels) in enumerate(dataloader):
@@ -149,10 +153,11 @@ class BaseTrainer:
                
                 self.validate_step(images, targets)
                                 
-    def _train_progress_text(self, batch_idx):
+    def _train_progress_text(self, batch_index):
+        assert self.train_length > 0
+        
         base = "[{}/{} ({:.0f}%)]"
-        current = batch_idx
-        return base.format(current, self.train_length, 100.0 * current / self.train_length)
+        return base.format(batch_index, self.train_length, 100.0 * batch_index / self.train_length)
 
     @property
     def optimizer(self):

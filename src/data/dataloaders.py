@@ -38,9 +38,9 @@ class DataLoaders:
         self.num_workers = num_workers
         self.dataset_object = utils.general.get_class(**dataset_config)
         
-        self.train = self._generate_dataset(train_dirs, True)
-        self.val = self._generate_dataset(val_dirs, False)
-        self.test = self._generate_dataset(test_dirs, False)
+        self._train = self._generate_dataset(train_dirs, True)
+        self._val = self._generate_dataset(val_dirs, False)
+        self._test = self._generate_dataset(test_dirs, False)
 
                 
     def _generate_dataset(self, dirs: list, is_train: bool) -> Dataset:
@@ -52,13 +52,30 @@ class DataLoaders:
         datasets = [self.dataset_object(root_dir=pathlib.Path(directory), transform=transform) for directory in dirs ]
             
         return ConcatDataset(datasets)
+    
+    @property
+    def test_length(self):
+        error_msg = "[!] The test dataset is not properly configured."
+        assert self._test is not None, error_msg
+        return len(self._test)
+    
+    @property
+    def train_length(self):
+        error_msg = "[!] The train dataset is not properly configured."
+        assert self._train is not None, error_msg
+        return len(self._train)
+    @property
+    def val_length(self):
+        error_msg = "[!] The validation dataset is not properly configured."
+        assert self._val is not None, error_msg
+        return len(self._val)
 
     @property
     def train_dataloader(self):
         error_msg = "[!] The train dataset is not properly configured."
-        assert self.train is not None, error_msg
+        assert self._train is not None, error_msg
         
-        return DataLoader(dataset=self.train, 
+        return DataLoader(dataset=self._train, 
                           batch_size=self.batch_size, 
                           num_workers=self.num_workers,
                           collate_fn=_collate_fn)
@@ -66,9 +83,9 @@ class DataLoaders:
     @property
     def val_dataloader(self):
         error_msg = "[!] The validation dataset is not properly configured."
-        assert self.val is not None, error_msg
+        assert self._val is not None, error_msg
         
-        return DataLoader(dataset=self.val, 
+        return DataLoader(dataset=self._val, 
                           batch_size=self.batch_size, 
                           num_workers=self.num_workers,
                           collate_fn=_collate_fn)
@@ -76,9 +93,9 @@ class DataLoaders:
     @property
     def test_dataloader(self):
         error_msg = "[!] The test dataset is not properly configured."
-        assert self.test is not None, error_msg
+        assert self._test is not None, error_msg
         
-        return DataLoader(dataset=self.test, 
+        return DataLoader(dataset=self._test, 
                           batch_size=self.batch_size, 
                           num_workers=self.num_workers,
                           collate_fn=_collate_fn)

@@ -32,7 +32,14 @@ class Metrics:
       return 0
     else: 
       return self.tp / (self.tp + self.fn)
-
+    
+  @property
+  def f1_score(self) -> float:
+    if (self.precision+self.recall) == 0:
+      return 0
+    else: 
+      return (2*self.precision*self.recall) / (self.precision + self.recall)
+    
   @property
   def true_positives(self)-> int:
     return self.tp
