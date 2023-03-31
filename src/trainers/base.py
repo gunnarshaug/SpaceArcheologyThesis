@@ -9,11 +9,9 @@ from data.dataloaders import DataLoaders
 class BaseTrainer:
     def __init__(self,
                  device:str,
-                 logger: Logger,
                  config: dict,
                  checkpoint_dir: str):
         self.device = device
-        self.logger = logger
         self.train_loss = utils.metrics.Averager()
         self.val_metrics = utils.metrics.Metrics()
         self.test_metrics = utils.metrics.Metrics()
@@ -105,10 +103,10 @@ class BaseTrainer:
         })
         
         self.model.eval() 
-        for batch_idx, (images, targets ) in enumerate(data_loaders.test_dataloader):
+        for batch_idx, (images, labels, image_location ) in enumerate(data_loaders.test_dataloader):
             images = list(image.to(self.device) for image in images)
-            targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
-            _ = self.test_step(images, targets)
+            targets = [{key: value.to(self.device) for key, value in label.items() if not isinstance(value, str)} for label in labels]
+            _ = self.test_step(images, targets, image_location)
                                     
         self.logger.log_metrics({
             "Test/Recall": self.test_metrics.recall,
@@ -122,11 +120,11 @@ class BaseTrainer:
             
     def _train_epoch(self, epoch, dataloader):
         self.model.train()
-        for batch_idx, (inputs, labels) in enumerate(dataloader):
+        for batch_idx, (inputs, labels, _) in enumerate(dataloader):
             self.optimizer.zero_grad()
             
             images = list(image.to(self.device) for image in inputs)
-            targets = [{k: v.to(self.device) for k, v in t.items()} for t in labels]
+            targets = [{key: value.to(self.device) for key, value in label.items() if not isinstance(value, str)} for label in labels]
             loss = self.train_step(images, targets)
             
             self.train_loss.update(loss.item())
@@ -147,9 +145,9 @@ class BaseTrainer:
     def _validate_epoch(self, epoch, dataloader):
         self.model.eval()
         with torch.no_grad():
-            for batch_idx, (inputs, labels) in enumerate(dataloader):
+            for batch_idx, (inputs, labels, _) in enumerate(dataloader):
                 images = list(image.to(self.device) for image in inputs)
-                targets = [{k: v.to(self.device) for k, v in t.items()} for t in labels]
+                targets = [{key: value.to(self.device) for key, value in label.items() if not isinstance(value, str)} for label in labels]
                
                 self.validate_step(images, targets)
                                 

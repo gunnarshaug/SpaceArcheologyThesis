@@ -49,7 +49,7 @@ class WandbLogger(Logger):
         else:
             self.experiment.log(metrics)
 
-    def log_image(self, image, predicted_boxes, prediction_scores, ground_truth_boxes):
+    def log_image(self, image, predicted_boxes, prediction_scores, ground_truth_boxes, location:str=None):
         boxes_predicted =  {
             "predictions":
             {
@@ -63,8 +63,8 @@ class WandbLogger(Logger):
             }
         }
         
-        wandb_image_predicted = [wandb.Image(image, boxes=boxes_predicted)]
-        wandb_image_gt = [wandb.Image(image, boxes=boxes_gt)]
+        wandb_image_predicted = [wandb.Image(image, boxes=boxes_predicted, caption=location if location is not None else "")]
+        wandb_image_gt = [wandb.Image(image, boxes=boxes_gt, caption=location if location is not None else "")]
 
         self.experiment.log({"Images/Predicted": wandb_image_predicted})
         self.experiment.log({"Images/GroundTruth": wandb_image_gt})

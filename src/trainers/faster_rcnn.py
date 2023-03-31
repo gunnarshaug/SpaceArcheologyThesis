@@ -39,7 +39,7 @@ class Trainer(trainers.base.BaseTrainer):
             if predicted_boxes_count == 0 and gt_boxes_count == 0:
                 continue
             
-    def test_step(self, inputs, targets):
+    def test_step(self, inputs, targets, image_location):
         output = self.model(inputs)
         boxes = []
         for i, prediction in enumerate(output):
@@ -62,7 +62,8 @@ class Trainer(trainers.base.BaseTrainer):
                     "image": inputs[i],
                     "predicted_boxes":  nms_prediction["boxes"],
                     "ground_truth_boxes": ground_truth["boxes"],
-                    "prediction_scores":nms_prediction["scores"]
+                    "prediction_scores":nms_prediction["scores"],
+                    "location": image_location[i]
                 }
                 self.has_logged_image = True
                 self.logger.log_image(**parameters)
