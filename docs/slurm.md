@@ -35,3 +35,9 @@ config="${configs[$SLURM_ARRAY_TASK_ID]}"
 
 python train.py --config="$config"
 ```
+
+
+# Useful commands
+```
+srun --gres=gpu:0 --partition=gpuA100 --pty bash
+```
