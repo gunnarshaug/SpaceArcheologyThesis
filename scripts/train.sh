@@ -7,7 +7,7 @@
 #SBATCH --output=frcnn_%A_%a.out
 
 uenv verbose cuda-11.4 cudnn-11.4-8.2.4
-uenv miniconda3-python39
+uenv miniconda3-py39
 conda activate pytorch_env
 
 configs=("frcnn_slope.yml" "frcnn_slrm.yml" "frcnn_msrm_sf1.yml" "frcnn_msrm_sf2.yml")
