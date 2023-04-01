@@ -22,7 +22,7 @@ class WandbLogger(Logger):
                 "You want to use `wandb` logger which is not installed yet,"
                 " install it with `pip install wandb`." 
             )
-        self.timestamp = datetime.datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
+        self._timestamp = datetime.datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
         self._wandb_init: Dict[str, Any] = dict(
             project=project,
             notes=description,
@@ -42,6 +42,9 @@ class WandbLogger(Logger):
         self._name = self._wandb_init.get("name")
         self._id = self._wandb_init.get("id")
         self._experiment = None
+    @property
+    def timestamp(self):
+        return self._timestamp
     
     def log_metrics(self, metrics: dict, step: Optional[int] = None) -> None:
         if step is not None:
