@@ -11,11 +11,8 @@ class Trainer(trainers.base.BaseTrainer):
                  config: dict):
         
         self.image_log_count = 0
-        self._model = None
-                
-        checkpoint_dir = config.get("model", {}).get("checkpoint_dir", "checkpoints")
-        
-        super().__init__(device, config, checkpoint_dir=checkpoint_dir)
+        self._model = None        
+        super().__init__(device, config)
 
     def train_step(self, inputs, targets):
         output = self.model(inputs, targets)

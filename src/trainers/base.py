@@ -9,8 +9,7 @@ from data.dataloaders import DataLoaders
 class BaseTrainer:
     def __init__(self,
                  device:str,
-                 config: dict,
-                 checkpoint_dir: str):
+                 config: dict):
         self.device = device
         self.train_loss = utils.metrics.Averager()
         self.val_metrics = utils.metrics.Metrics()
@@ -19,8 +18,8 @@ class BaseTrainer:
         self.epochs = self.config["training"]["epochs"]
         self.log_step = int(np.sqrt(self.config["dataloader"]["batch_size"]))
         self.train_length = 0
-        self.checkpoint_dir = checkpoint_dir
-        
+        self.checkpoint_dir = self.config.get("model", {}).get("checkpoint_dir", "checkpoints")
+
         logger_config = self.config["classes"]["logger"]
 
         self.logger = utils.general.get_class(**logger_config)(
@@ -190,7 +189,7 @@ class BaseTrainer:
         """
         
         utils.general.ensure_existing_dir(self.checkpoint_dir)
-        file_path = "{}/checkpoint-epoch{}.pt".format(self.checkpoint_dir,epoch)
+        file_path = "{}_{}/checkpoint-epoch{}.pt".format(self.checkpoint_dir, self.logger.timestamp, epoch)
         torch.save(self.model, file_path)
         self.logger.info("Saving checkpoint: {} ...".format(file_path))
 
