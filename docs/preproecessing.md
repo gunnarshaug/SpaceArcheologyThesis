@@ -8,7 +8,7 @@ ArcGIS Pro with one of the following licenses:
 
 ### 2. Relief Visualization Toolbox (optional)
 
-  The [Relief Visualization Toolbox](https://rvt-py.readthedocs.io/en/latest/index.html) includes ready to use raster functions, specifically for elevation datasets, and simplifies the process of of calculating `Multi-Scale Relief Model` and `Simple Local Relief Model`. See [RVT Installation Guide](https://rvt-py.readthedocs.io/en/latest/install_arcgis.html#install-arcgis) for more details about the tool.
+  The [Relief Visualization Toolbox](https://rvt-py.readthedocs.io/en/latest/index.html) includes ready to use raster functions, specifically for elevation datasets, and simplifies the process of of calculating `Multi-Scale Relief Model` and `Simple Local Relief Model`. See [RVT Installation Guide](https://rvt-py.readthedocs.io/en/latest/install_arcgis.html#install-arcgis).
 
 ## Workflow
 ### Prepare Ground Truth Database
@@ -21,14 +21,28 @@ ArcGIS Pro with one of the following licenses:
 ```
 enkeltminneart IN (1702, 1703) AND vernetype NOT IN ('FJE')
 ```
+The database design documentation can be found [here](https://objektkatalog.geonorge.no/Objekttype/Index/EAID_3736F10E_99EC_4ddb_9FBF_EF8ED91AEEB2). 
+
+There are some grave fields that are missing individual boxes or is not clearly visible in the visualization. These burial mounds should be excluded form the datasets:
+Witin the edit tap, click `Select` and then select the feature you want to delete:
+-----image-----
+Next, click on the `Delete` button:
+-----image-----
+If the mound has wrong placement you can move and scale the feature by right clicking on it while it is selected. Then click `move` or `scale`.
 
 ### Prepare LiDAR data
 
 1. Download LiDAR data from [Norwegian Mapping Authority](https://hoydedata.no).
-2. Import the raw data into a chosen folder.
+2. Import the downloaded data into a chosen (temporarily) folder.
 3. Merge parts into one raster using `Moasic to New Raster` tool in ArcGIS Pro. 
+
+    ![Mosaic to New Raster tool in ArcGIS Pro](images/Mosaic_To_New_Raster.png)
+
 4. Calculate selected relief models.
 
 
 ### Annotation
-1. Use the `Export Training Data fro Deep Learning` tool for each relief model. 
+Use the `Export Training Data for Deep Learning` tool for each relief model.    
+![Export Training Data for Deep Learning tool in ArcGIS Pro](images/Export_Training_Data.png)
+
+The parameter `minimum polygon overlap ratio` is the percentage for a feature to be included in the training data. If the percentage overlap is less than the value specified, the feature will be excluded from the training chip, and will not be added to the label file. See [Export Training Data For Deep Learning](https://pro.arcgis.com/en/pro-app/latest/tool-reference/image-analyst/export-training-data-for-deep-learning.htm). In this project, the value was set in the range [0.9, 1].
