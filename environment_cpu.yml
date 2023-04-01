@@ -1,4 +1,4 @@
-name: pytorch_cpuonly
+name: pytorch_env
 channels:
   - pytorch
   - conda-forge
