@@ -40,7 +40,7 @@ dataloader:
 
 training:
   seed: 1
-  epochs: 1
+  epochs: 10
   optimizer:    
     type: sdg
     lr: 0.01
