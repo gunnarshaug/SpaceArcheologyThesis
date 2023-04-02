@@ -40,7 +40,6 @@ Alternatively use the following command to create the conda environment:
 ```
 conda create --file environment.yml
 ```
-It is recommended to use GPU resources for training. However, you can use `environment_cpu.yml` to install the cpuonly environment. 
 
 ## Set up W&B for logging
 <!-- There are currently one implementation of the `Logger` class: `WandbLogger`. 
