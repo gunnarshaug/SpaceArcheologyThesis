@@ -1,6 +1,5 @@
 from torch.utils.data import DataLoader, ConcatDataset, Dataset
 import utils.general
-import pathlib 
 import albumentations as a
 import albumentations.pytorch.transforms
 
@@ -49,7 +48,7 @@ class DataLoaders:
             is_train=is_train
         )
         
-        datasets = [self.dataset_object(root_dir=pathlib.Path(directory), transform=transform) for directory in dirs ]
+        datasets = [self.dataset_object(root_dir=directory, transform=transform) for directory in dirs ]
             
         return ConcatDataset(datasets)
     

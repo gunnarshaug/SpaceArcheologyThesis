@@ -2,7 +2,6 @@ import os
 import PIL
 import xml
 import torch
-import cv2
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
@@ -27,7 +26,9 @@ class PascalVOCDataset(Dataset):
         - esri_model_definition.emd (not relevant)
         - stats.txt (not relevant)
     """
-    def __init__(self, root_dir, transform=None) -> None:
+    def __init__(self,
+                 root_dir:str,
+                 transform=None) -> None:
         self.root_dir = root_dir
         self.transform = transform
         map_path = os.path.join(root_dir, "map.txt")
