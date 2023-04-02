@@ -13,5 +13,5 @@ conda activate pytorch_env
 configs=("frcnn_slope.yml" "frcnn_slrm.yml" "frcnn_msrm_sf1.yml" "frcnn_msrm_sf2.yml")
 config="${configs[$SLURM_ARRAY_TASK_ID]}"
 
-python src/train.py --config="$config"
+python -u src/train.py --config="$config"
 # python train.py --config="$config" > subtask_0${SLURM_ARRAY_TASK_ID}.txt
