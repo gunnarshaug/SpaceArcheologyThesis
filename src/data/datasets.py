@@ -38,7 +38,7 @@ class PascalVOCDataset(Dataset):
         return len(self.map)
 
     def __getitem__(self, index) -> tuple:
-        image_name = str(self.map.iloc[index].image)
+        image_name = str(self.map.iloc[index].image).replace("\\", "/")
         image_location = os.path.join(self.root_dir, image_name)
         image = PIL.Image.open(image_location).convert('RGB')
         bounding_boxes = []
