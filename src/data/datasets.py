@@ -1,6 +1,6 @@
 import os
 import PIL
-import xml
+import xml.etree
 import torch
 import numpy as np
 import pandas as pd
@@ -48,8 +48,8 @@ class PascalVOCDataset(Dataset):
         
         has_bounding_boxes = str(self.map.iloc[index].annotation) != "nan"
         if has_bounding_boxes:
-
-            annotation_file = os.path.join(self.root_dir, str(self.map.iloc[index].annotation))
+            map_path = str(self.map.iloc[index].annotation).replace("\\", "/")
+            annotation_file = os.path.join(self.root_dir, map_path)
 
             annotation = xml.etree.ElementTree.parse(annotation_file).getroot()
             no_objects = len(annotation.findall("object"))
