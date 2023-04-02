@@ -7,5 +7,5 @@
  
 # Set up environment
 uenv verbose cuda-11.4 cudnn-11.4-8.2.4
-uenv miniconda-python39
+uenv miniconda3-py39
 conda env create --file environment.yml

@@ -31,14 +31,14 @@ The following lists the prerequisites to follow along this guide. Note that ther
   
 ## Install Dependencies
 
-Install the dependencies with `anaconda` or `miniconda` using a batch script to submit the job to the slurm-cluster.
+Install the dependencies with `conda` using a batch script to submit the job to the slurm-cluster.
 ```
 sbatch scripts/setup.sh
 ```
 
 Alternatively use the following command to create the conda environment:
 ```
-conda create --file environment.yml
+conda env create --file environment.yml
 ```
 **Note**: Make sure that the [Cuda](https://developer.nvidia.com/cuda-toolkit) and [cuDNN](https://developer.nvidia.com/cudnn) versions are matching with the `cudatoolkit` version and are compatible with the installed [Pytroch](https://pytorch.org/) version.
 
