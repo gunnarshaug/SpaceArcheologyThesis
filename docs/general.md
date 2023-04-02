@@ -20,6 +20,7 @@ It was used to copy local files to a remote host.
 ```
 rsync -av ./<src-folder>/ <hostname>:<dst-path>
 ```
+**Note:** Use linux with WSL for windows.
 
 ## SLURM
 ### Interactive job
