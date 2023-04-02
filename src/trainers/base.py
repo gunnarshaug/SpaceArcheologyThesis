@@ -187,13 +187,13 @@ class BaseTrainer:
         :param epoch: current epoch number
         :param save_best: if True, rename the saved checkpoint to 'model_best.pt'
         """
-        
-        utils.general.ensure_existing_dir(self.checkpoint_dir)
-        file_path = "{}_{}/checkpoint-epoch{}.pt".format(self.checkpoint_dir, self.logger.timestamp, epoch)
+        save_dir = "{}_{}".format(self.checkpoint_dir, self.logger.timestamp)
+        utils.general.ensure_existing_dir(save_dir)
+        file_path = "{}/checkpoint-epoch{}.pt".format(save_dir, epoch)
         torch.save(self.model, file_path)
         self.logger.info("Saving checkpoint: {} ...".format(file_path))
 
         if save_best:
-            best_path = "{}/model_best.pt".format(self.checkpoint_dir)
+            best_path = "{}/model_best.pt".format(save_dir)
             torch.save(self.model, best_path)
             self.logger.info("Saving current best: model_best.pt ...")
