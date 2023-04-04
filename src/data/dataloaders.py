@@ -77,7 +77,9 @@ class DataLoaders:
         return DataLoader(dataset=self._train, 
                           batch_size=self.batch_size, 
                           num_workers=self.num_workers,
-                          collate_fn=_collate_fn)
+                          collate_fn=_collate_fn,
+                          pin_memory=True,
+                          shuffle=True)
 
     @property
     def val_dataloader(self):
@@ -87,7 +89,9 @@ class DataLoaders:
         return DataLoader(dataset=self._val, 
                           batch_size=self.batch_size, 
                           num_workers=self.num_workers,
-                          collate_fn=_collate_fn)
+                          collate_fn=_collate_fn,
+                          pin_memory=True,
+                          shuffle=True)
         
     @property
     def test_dataloader(self):
@@ -97,7 +101,9 @@ class DataLoaders:
         return DataLoader(dataset=self._test, 
                           batch_size=self.batch_size, 
                           num_workers=self.num_workers,
-                          collate_fn=_collate_fn)
+                          collate_fn=_collate_fn,
+                          pin_memory=True,
+                          shuffle=True)
         
 def _collate_fn(batch) -> tuple:
     """
