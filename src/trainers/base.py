@@ -19,8 +19,8 @@ class BaseTrainer:
         self.log_step = int(np.sqrt(self.config["dataloader"]["batch_size"]))
         self.train_length = 0
         self.checkpoint_dir = self.config.get("model", {}).get("checkpoint_dir", "checkpoints")
-        self._optimizer = None
-        self._lr_scheduler = None
+        self._lr_scheduler = self._get_lr_scheduler()
+        self._optimizer = self._get_lr_scheduler()
 
         logger_config = self.config["classes"]["logger"]        
         self.logger = utils.general.get_class(**logger_config)(
@@ -159,8 +159,7 @@ class BaseTrainer:
 
     @property
     def optimizer(self):
-        if self._optimizer is None:
-            self._optimizer = self._get_optimizer()
+        assert self._optimizer is not None
         return self._optimizer
             
     def _get_optimizer(self):
@@ -180,8 +179,7 @@ class BaseTrainer:
 
     @property
     def lr_scheduler(self):
-        if self._lr_scheduler is None:
-            self._lr_scheduler = self._get_lr_scheduler()
+        assert self._optimizer is not None
         return self._lr_scheduler
 
     def _get_lr_scheduler(self):
