@@ -19,9 +19,10 @@ class BaseTrainer:
         self.log_step = int(np.sqrt(self.config["dataloader"]["batch_size"]))
         self.train_length = 0
         self.checkpoint_dir = self.config.get("model", {}).get("checkpoint_dir", "checkpoints")
+        self._optimizer = None
+        self._lr_scheduler = None
 
-        logger_config = self.config["classes"]["logger"]
-
+        logger_config = self.config["classes"]["logger"]        
         self.logger = utils.general.get_class(**logger_config)(
             **self.config["experiment"],
             config=self.config["training"]
@@ -158,28 +159,44 @@ class BaseTrainer:
 
     @property
     def optimizer(self):
-        optimizer_config = self.config["training"]["optimizer"]
-        if optimizer_config["type"] == "sdg":                
+        if self._optimizer is None:
+            self._optimizer = self._get_optimizer()
+        return self._optimizer
+            
+    def _get_optimizer(self):
+        optimizer_config = self.config.get("training", {}).get("optimizer", None)
+        assert optimizer_config is not None, "[!] optimizer not properly configured"
+
+        supported_optimizers = ("sdg")
+        assert optimizer_config["type"] in supported_optimizers, "[!] lr_scheduler must be on of the types: {}".format(supported_optimizers)
+
+        if optimizer_config["type"] == "sdg":
             return torch.optim.SGD(
                 params=[p for p in self.model.parameters() if p.requires_grad],
                 lr=optimizer_config["lr"],
                 momentum=optimizer_config["momentum"],
                 weight_decay=optimizer_config["weight_decay"]
-            )
-        else:
-             raise ValueError("Invalid optimizer type: {}".format(optimizer_config["type"]))
+            )           
 
     @property
     def lr_scheduler(self):
-        scheduler_config = self.config["training"]["scheduler"]
+        if self._lr_scheduler is None:
+            self._lr_scheduler = self._get_lr_scheduler()
+        return self._lr_scheduler
+
+    def _get_lr_scheduler(self):
+        scheduler_config = self.config.get("training", {}).get("scheduler", None)
+        assert scheduler_config is not None, "[!] lr_scheduler not properly configured"
+
+        supported_schedulers = ("steplr")
+        assert scheduler_config["type"] in supported_schedulers, "[!] lr_scheduler must be on of the types: {}".format(supported_schedulers)
+        
         if scheduler_config["type"] == "steplr":
             return torch.optim.lr_scheduler.StepLR(
                 step_size= scheduler_config["step_size"],
                 gamma=scheduler_config["gamma"],
                 optimizer=self.optimizer
             )
-        else:
-             raise ValueError("Invalid learning rate scheduler type: {}".format(scheduler_config["type"]))
 
     def _save_checkpoint(self, epoch, save_best=False):
         """
