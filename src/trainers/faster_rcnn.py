@@ -30,6 +30,7 @@ class Trainer(trainers.base.BaseTrainer):
                 nms_prediction['boxes'].to(self.device),
                 ground_truth['boxes'].to(self.device)
             )
+            self.val_metrics.update(iou)
 
             predicted_boxes_count, gt_boxes_count = list(iou.size())
 
@@ -50,9 +51,7 @@ class Trainer(trainers.base.BaseTrainer):
             )
             boxes.append(nms_prediction)
             self.test_metrics.update(iou)
-            
-            self.val_metrics.update(iou)
-            
+                        
             if self.image_log_count <= 10: 
                 self.image_log_count += 1
                 parameters = {
