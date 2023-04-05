@@ -159,9 +159,9 @@ class BaseTrainer:
                                 
     def _train_progress_text(self, batch_index):
         assert self.train_length > 0
-        current = batch_index + self.config["dataloader"]["batch_size"]
+        current_progress = batch_index * self.config["dataloader"]["batch_size"]
         base = "[{}/{} ({:.0f}%)]"
-        return base.format(current, self.train_length, 100.0 * current / self.train_length)
+        return base.format(current_progress, self.train_length, 100.0 * current_progress / self.train_length)
 
     @property
     def optimizer(self):
