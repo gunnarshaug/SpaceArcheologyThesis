@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader, ConcatDataset, Dataset
 import utils.general
-import albumentations as a
+import albumentations as alb
 import albumentations.pytorch.transforms
 
 class DataLoaders:
@@ -22,35 +22,29 @@ class DataLoaders:
                   dataset_config: dict,
                   transform_opts: dict,
                   batch_size: int, 
-                  num_workers: int):
-        error_msg = "[!] 'transform_opts' should be a dictionary containing the keys 'width' and 'height'"
-        assert "width" in transform_opts, error_msg
-        assert "height" in transform_opts, error_msg
-                
+                  num_workers: int=0):
         error_msg = "[!] 'dataset_config' should be a dictionary containing the keys 'package', 'module' and 'name'"
         assert "package" in dataset_config, error_msg
         assert "module" in dataset_config, error_msg
         assert "name" in dataset_config, error_msg
-
+        self.dataset_object = utils.general.get_class(**dataset_config)
+        
         self.transform_opts = transform_opts
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.dataset_object = utils.general.get_class(**dataset_config)
         
         self._train = self._generate_dataset(train_dirs, True)
         self._val = self._generate_dataset(val_dirs, False)
         self._test = self._generate_dataset(test_dirs, False)
-
+    
                 
     def _generate_dataset(self, dirs: list, is_train: bool) -> Dataset:
         transform = _get_transform(
             self.transform_opts, 
             is_train=is_train
         )
-        
-        datasets = [self.dataset_object(root_dir=directory, transform=transform) for directory in dirs ]
-            
-        return ConcatDataset(datasets)
+        assert len(dirs) > 0
+        return utils.general.generate_dataset(dirs, self.dataset_object, transform)
     
     @property
     def test_length(self):
@@ -69,64 +63,61 @@ class DataLoaders:
         assert self._val is not None, error_msg
         return len(self._val)
 
-    @property
-    def train_dataloader(self):
+    def generate_train_dataloader(self) -> DataLoader:
         error_msg = "[!] The train dataset is not properly configured."
         assert self._train is not None, error_msg
-        
-        return DataLoader(dataset=self._train, 
-                          batch_size=self.batch_size, 
-                          num_workers=self.num_workers,
-                          collate_fn=_collate_fn,
-                          pin_memory=True,
-                          shuffle=True)
+        return DataLoader(
+                dataset=self._train, 
+                batch_size=self.batch_size, 
+                num_workers=self.num_workers,
+                collate_fn=utils.general.collate_fn,
+                pin_memory=True,
+                shuffle=True
+            )
 
-    @property
-    def val_dataloader(self):
+    def generate_val_dataloader(self) -> DataLoader:
         error_msg = "[!] The validation dataset is not properly configured."
         assert self._val is not None, error_msg
         
-        return DataLoader(dataset=self._val, 
-                          batch_size=self.batch_size, 
-                          num_workers=self.num_workers,
-                          collate_fn=_collate_fn,
-                          pin_memory=True,
-                          shuffle=True)
+        return DataLoader(
+                dataset=self._val, 
+                batch_size=self.batch_size, 
+                num_workers=self.num_workers,
+                collate_fn=utils.general.collate_fn,
+                pin_memory=True,
+                shuffle=True)
+
         
-    @property
-    def test_dataloader(self):
+    def generate_test_dataloader(self) -> DataLoader:
         error_msg = "[!] The test dataset is not properly configured."
         assert self._test is not None, error_msg
         
         return DataLoader(dataset=self._test, 
                           batch_size=self.batch_size, 
                           num_workers=self.num_workers,
-                          collate_fn=_collate_fn,
+                          collate_fn=utils.general.collate_fn,
                           pin_memory=True,
                           shuffle=True)
         
-def _collate_fn(batch) -> tuple:
-    """
-    copy from https://github.com/pytorch/vision/blob/main/references/detection/utils.py
-    """
-    return tuple(zip(*batch))
-
-
-def _get_transform(dimensions: dict, is_train:bool=False) -> a.Compose:
+def _get_transform(options: dict, is_train:bool=False) -> alb.Compose:
+    error_msg = "[!] transform options 'options' should be a dictionary containing the keys 'width' and 'height'"
+    assert "width" in options, error_msg
+    assert "height" in options, error_msg
+    
     transforms = []
-    transforms.append(a.Resize(dimensions["width"], dimensions["height"]))
+    transforms.append(alb.Resize(options["width"], options["height"]))
 
     if is_train:
-        transforms.append(a.HorizontalFlip(p=0.5))
-        transforms.append(a.RandomBrightnessContrast(p=0.2))
-
+        transforms.append(alb.HorizontalFlip(p=0.5))
+        transforms.append(alb.RandomBrightnessContrast(p=0.2))
+        
     transforms.append(
-        a.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        alb.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     )
+    
+    transforms.append(alb.pytorch.transforms.ToTensorV2())
 
-    transforms.append(albumentations.pytorch.transforms.ToTensorV2())
-
-    return a.Compose(
+    return alb.Compose(
         transforms,
-        bbox_params=a.BboxParams(format='pascal_voc', label_fields=['class_labels'])
+        bbox_params=alb.BboxParams(format='pascal_voc', label_fields=['class_labels'])
     )

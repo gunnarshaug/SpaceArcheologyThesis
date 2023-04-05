@@ -4,6 +4,8 @@ import yaml
 import pathlib
 import importlib
 import torchvision
+from torch.utils.data import ConcatDataset
+
 
 def load_yaml(path):
     with open(path) as file:
@@ -59,3 +61,13 @@ def apply_nms(orig_prediction, iou_thresh: float = 0.3) -> dict:
   final_prediction['labels'] = final_prediction['labels'][keep].cpu()
   
   return final_prediction
+
+def generate_dataset(dirs: str, dataset_object,  transform):
+    datasets = [dataset_object(root_dir=directory, transform=transform) for directory in dirs ]
+    return ConcatDataset(datasets)
+
+def collate_fn(batch) -> tuple:
+    """
+    copy from https://github.com/pytorch/vision/blob/main/references/detection/utils.py
+    """
+    return tuple(zip(*batch))

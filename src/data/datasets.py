@@ -24,9 +24,10 @@ class PascalVOCDataset(Dataset):
     def __init__(self,
                  root_dir:str,
                  transform=None) -> None:
+        assert root_dir is not None and root_dir != ""
         self.root_dir = root_dir
         self.transform = transform
-        
+
         path = os.path.join(self.root_dir, "images/*.tif")
         normalized_path = os.path.normpath(path)
         self.images = sorted(glob.glob(normalized_path))
@@ -40,10 +41,10 @@ class PascalVOCDataset(Dataset):
         image = PIL.Image.open(image_path).convert('RGB')
 
         target = self.get_annotation(index, image_name)
-        target["image_location"] = image_name
 
         if self.transform is not None:
             image_numpy = np.array(image)
+            
             transformed = self.transform(
                 image=image_numpy,
                 bboxes=target["boxes"],
@@ -53,11 +54,10 @@ class PascalVOCDataset(Dataset):
             boxes = torch.as_tensor(transformed['bboxes'], dtype=torch.float32)
             target["boxes"] = boxes
 
-            # If no bounding boxes are found, set them to a tensor of zeros
             if len(target["boxes"]) == 0:
                 target["boxes"] = torch.zeros((0, 4), dtype=torch.float32)
         
-        return image, target, image_name
+        return image, target
 
     def get_annotation(self, index, image_name):
         annotation_path = os.path.join(self.root_dir, "labels", image_name.replace(".tif", ".xml"))
@@ -83,13 +83,10 @@ class PascalVOCDataset(Dataset):
         iscrowd = torch.zeros((boxes.shape[0],), dtype=torch.int64)
         area = torch.as_tensor(area, dtype=torch.float32)
         
-        target = {
+        return {
             "boxes": boxes,
             "labels": labels,
             "image_id": image_id,
             "area": area,
             "iscrowd": iscrowd         
         }
-        
-        return target
-
