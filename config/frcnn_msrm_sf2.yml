@@ -30,17 +30,16 @@ data:
   test_dirs: 
     - datasets/processed/NDH_Karmoy_Haugesund_5pkt_2017/avaldsnes/msrm_sf2
     - datasets/processed/NDH_Larvik_5pkt_2017/larvik_hedrum/msrm_sf2
-
+    
 dataloader:
   batch_size: 10
-  num_workers: 4
+  num_workers: 0
   transform_opts: 
     width: 224
     height: 224
-
 training:
   seed: 1
-  epochs: 10
+  epochs: 120
   optimizer:    
     type: sdg
     lr: 0.005
