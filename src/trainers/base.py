@@ -157,7 +157,7 @@ class BaseTrainer:
                 targets = [{key: value.to(self.device) for key, value in label.items() if not isinstance(value, str)} for label in labels]
                 self.validate_step(images, targets)
                                 
-    def _train_progress_text(self, batch_index, batch_size):
+    def _train_progress_text(self, batch_index):
         assert self.train_length > 0
         current = batch_index + self.config["dataloader"]["batch_size"]
         base = "[{}/{} ({:.0f}%)]"
