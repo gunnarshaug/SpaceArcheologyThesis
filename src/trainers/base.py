@@ -157,11 +157,11 @@ class BaseTrainer:
                 targets = [{key: value.to(self.device) for key, value in label.items() if not isinstance(value, str)} for label in labels]
                 self.validate_step(images, targets)
                                 
-    def _train_progress_text(self, batch_index):
+    def _train_progress_text(self, batch_index, batch_size):
         assert self.train_length > 0
-        
+        current = batch_index + self.config["dataloader"]["batch_size"]
         base = "[{}/{} ({:.0f}%)]"
-        return base.format(batch_index, self.train_length, 100.0 * batch_index / self.train_length)
+        return base.format(current, self.train_length, 100.0 * current / self.train_length)
 
     @property
     def optimizer(self):
