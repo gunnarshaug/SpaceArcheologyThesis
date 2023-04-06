@@ -109,11 +109,8 @@ class BaseTrainer:
             for batch_idx, (images, labels ) in enumerate(dataloader):
                 images = list(image.to(self.device) for image in images)
                 targets = [{key: value.to(self.device) for key, value in label.items() if not isinstance(value, str)} for label in labels]
-                # _ = self.test_step(images, targets)
-                print("IMAGE:")
-                print(images[0].shape)
-                print(images[0])
-                print()               
+                _ = self.test_step(images, targets)
+
             self.logger.log_metrics({
                 "Test/Recall": self.test_metrics.recall,
                 "Test/Precision": self.test_metrics.precision,
