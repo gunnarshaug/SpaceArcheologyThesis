@@ -20,11 +20,11 @@ model:
 
 data:
   train_dirs:
-    - replication/data/train
+    - datasets/replication/train
   val_dirs:
-    - replication/data/val
+    - datasets/replication/val
   test_dirs: 
-    - replication/data/test
+    - datasets/replication/test
 
 dataloader:
   batch_size: 10
