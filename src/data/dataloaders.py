@@ -111,8 +111,12 @@ def _get_transform(options: dict, is_train:bool=False) -> alb.Compose:
         transforms.append(alb.HorizontalFlip(p=0.5))
         transforms.append(alb.RandomBrightnessContrast(p=0.2))
         
+    mean = options.get("mean", [0.5, 0.5, 0.5])
+    std = options.get("std", [0.5, 0.5, 0.5])
+    print(mean,std)
+
     transforms.append(
-        alb.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+        alb.Normalize(mean=mean, std=std)
     )
     
     transforms.append(alb.pytorch.transforms.ToTensorV2())
