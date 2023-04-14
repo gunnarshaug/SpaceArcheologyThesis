@@ -30,13 +30,14 @@ class Trainer(trainers.base.BaseTrainer):
                 nms_prediction['boxes'].to(self.device),
                 ground_truth['boxes'].to(self.device)
             )
+            self.val_metrics.update(iou)
 
             predicted_boxes_count, gt_boxes_count = list(iou.size())
 
             if predicted_boxes_count == 0 and gt_boxes_count == 0:
                 continue
             
-    def test_step(self, inputs, targets, image_location):
+    def test_step(self, inputs, targets):
         output = self.model(inputs)
         boxes = []
         for i, prediction in enumerate(output):
@@ -50,9 +51,7 @@ class Trainer(trainers.base.BaseTrainer):
             )
             boxes.append(nms_prediction)
             self.test_metrics.update(iou)
-            
-            self.val_metrics.update(iou)
-            
+                        
             if self.image_log_count <= 10: 
                 self.image_log_count += 1
                 parameters = {
@@ -60,7 +59,7 @@ class Trainer(trainers.base.BaseTrainer):
                     "predicted_boxes":  nms_prediction["boxes"],
                     "ground_truth_boxes": ground_truth["boxes"],
                     "prediction_scores":nms_prediction["scores"],
-                    "location": image_location[i]
+                    "location": ""
                 }
                 self.has_logged_image = True
                 self.logger.log_image(**parameters)
@@ -69,8 +68,8 @@ class Trainer(trainers.base.BaseTrainer):
 
     @property
     def model(self):
-        if(self._model is None):
-            self._model = _get_object_detection_model()              
+        if self._model is None:
+            self._model = _get_object_detection_model()
             self._model.to(self.device)
         return self._model
         

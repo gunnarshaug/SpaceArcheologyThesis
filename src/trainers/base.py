@@ -1,10 +1,10 @@
 import torch
 import utils.metrics
 import utils.general
-from loggers.logger import Logger
 import numpy as np
 from abc import abstractproperty, abstractmethod
 from data.dataloaders import DataLoaders
+from torch.utils.data import DataLoader
 
 class BaseTrainer:
     def __init__(self,
@@ -71,17 +71,19 @@ class BaseTrainer:
             "NoImages/Val": data_loaders.val_length
         })
         self.train_length = data_loaders.train_length
+        train_dataloader = data_loaders.generate_train_dataloader()
+        val_dataloader = data_loaders.generate_val_dataloader()
         
         for epoch in range(1, self.epochs + 1):
             self.train_loss.reset()      
 
-            self._train_epoch(epoch, data_loaders.train_dataloader)
-            self._validate_epoch(epoch, data_loaders.val_dataloader)
+            self._train_epoch(epoch, train_dataloader)
+            self._validate_epoch(epoch, val_dataloader)
             
             self.lr_scheduler.step()
             
             
-            self.logger.info("Val set: Precision: {} Recall: {}\n".format(
+            self.logger.info("Val set: Precision: {:.6f} Recall: {:.6f}\n".format(
                 self.val_metrics.precision, 
                 self.val_metrics.recall))
 
@@ -101,14 +103,14 @@ class BaseTrainer:
         self.logger.log_metrics({
             "NoImages/Test": data_loaders.test_length
         })
-        
+        dataloader = data_loaders.generate_test_dataloader()
         self.model.eval() 
         with torch.no_grad():
-            for batch_idx, (images, labels, image_location ) in enumerate(data_loaders.test_dataloader):
+            for batch_idx, (images, labels ) in enumerate(dataloader):
                 images = list(image.to(self.device) for image in images)
                 targets = [{key: value.to(self.device) for key, value in label.items() if not isinstance(value, str)} for label in labels]
-                _ = self.test_step(images, targets, image_location)
-                                        
+                _ = self.test_step(images, targets)
+
             self.logger.log_metrics({
                 "Test/Recall": self.test_metrics.recall,
                 "Test/Precision": self.test_metrics.precision,
@@ -119,9 +121,10 @@ class BaseTrainer:
                 })
                 
             
-    def _train_epoch(self, epoch, dataloader):
+    def _train_epoch(self, epoch: int, dataloader: DataLoader):
+        assert dataloader is not None, "[!] Dataloader not properly configured"
         self.model.train()
-        for batch_idx, (inputs, labels, _) in enumerate(dataloader):
+        for batch_idx, (inputs, labels) in enumerate(dataloader):
             self.optimizer.zero_grad()
             
             images = list(image.to(self.device) for image in inputs)
@@ -136,27 +139,26 @@ class BaseTrainer:
             # adjust learning weights based on the gradients we just computed
             self.optimizer.step()
             
-            if (batch_idx+1) % self.log_step == 0:
-                self.logger.info("Train Epoch: {} {} Loss: {:.6f}".format(
-                    epoch,
-                    self._train_progress_text(batch_idx+1),
-                    self.train_loss.value))
+            # if (batch_idx+1) % self.log_step == 0:
+            self.logger.info("Train Epoch: {} {} Loss: {:.6f}".format(
+                epoch,
+                self._train_progress_text(batch_idx+1),
+                self.train_loss.value))
                 
              
     def _validate_epoch(self, epoch, dataloader):
         self.model.eval()
         with torch.no_grad():
-            for batch_idx, (inputs, labels, _) in enumerate(dataloader):
+            for batch_idx, (inputs, labels) in enumerate(dataloader):
                 images = list(image.to(self.device) for image in inputs)
                 targets = [{key: value.to(self.device) for key, value in label.items() if not isinstance(value, str)} for label in labels]
-               
                 self.validate_step(images, targets)
                                 
     def _train_progress_text(self, batch_index):
         assert self.train_length > 0
-        
+        current_progress = batch_index * self.config["dataloader"]["batch_size"]
         base = "[{}/{} ({:.0f}%)]"
-        return base.format(batch_index, self.train_length, 100.0 * batch_index / self.train_length)
+        return base.format(current_progress, self.train_length, 100.0 * current_progress / self.train_length)
 
     @property
     def optimizer(self):

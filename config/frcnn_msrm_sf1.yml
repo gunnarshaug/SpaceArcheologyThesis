@@ -33,17 +33,16 @@ data:
 
 dataloader:
   batch_size: 10
-  num_workers: 4
+  num_workers: 0
   transform_opts: 
     width: 224
     height: 224
-
 training:
   seed: 1
-  epochs: 10
+  epochs: 120
   optimizer:    
     type: sdg
-    lr: 0.005
+    lr: 0.01
     momentum: 0.9
     weight_decay: 0.0005
   scheduler: 
