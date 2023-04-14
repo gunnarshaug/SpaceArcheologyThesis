@@ -43,7 +43,7 @@ dataloader:
 model:
   checkpoint_dir: checkpoints/slope
 training:
-  epochs: 10
+  epochs: 120
   optimizer:
     lr: 0.005
     momentum: 0.9
