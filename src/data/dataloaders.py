@@ -44,7 +44,10 @@ class DataLoaders:
             is_train=is_train
         )
         assert len(dirs) > 0
-        return utils.general.generate_dataset(dirs, self.dataset_object, transform)
+        dataset = utils.general.generate_dataset(dirs, self.dataset_object, transform)
+        
+        assert len(dataset) > 0, "Dataset cannot be empty"
+        return dataset
     
     @property
     def test_length(self):
