@@ -20,9 +20,9 @@ model:
 
 data:
   train_dirs:
-    - datasets/processed_v2/NDH_Larvik_5pkt_2017/kaupang
-  val_dirs:
     - datasets/processed_v2/NDH_Larvik_5pkt_2017/larvik
+  val_dirs:
+    - datasets/processed_v2/NDH_Larvik_5pkt_2017/kaupang
   test_dirs: 
     - datasets/processed_v2/NDH_Karmoy_Haugesund/avaldsnes
 
