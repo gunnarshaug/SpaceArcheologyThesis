@@ -109,6 +109,8 @@ class Dataset2022(Dataset):
         path = os.path.join(root_dir, "images/*.png")
         normalized_path = os.path.normpath(path)
         self.images = sorted(glob.glob(normalized_path))
+        print(self.images)
+        
 
         annotations_file = os.path.join(root_dir, "classification.csv")
         self.img_labels = pd.read_csv(annotations_file)
