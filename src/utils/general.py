@@ -64,6 +64,8 @@ def apply_nms(orig_prediction, iou_thresh: float = 0.3) -> dict:
 
 def generate_dataset(dirs: str, dataset_object,  transform):
     datasets = [dataset_object(root_dir=directory, transform=transform) for directory in dirs ]
+    print([len(dataset) for dataset in datasets])
+
     return ConcatDataset(datasets)
 
 def collate_fn(batch) -> tuple:
