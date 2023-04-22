@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader, ConcatDataset, Dataset
 import utils.general
 import albumentations as alb
-import albumentations.pytorch.transforms
+import albumentations.pytorch.transforms as tr
 
 class DataLoaders:
     """
@@ -116,13 +116,12 @@ def _get_transform(options: dict, is_train:bool=False) -> alb.Compose:
         
     mean = options.get("mean", [0.5, 0.5, 0.5])
     std = options.get("std", [0.5, 0.5, 0.5])
-    print(mean,std)
 
     transforms.append(
         alb.Normalize(mean=mean, std=std)
     )
     
-    transforms.append(alb.pytorch.transforms.ToTensorV2())
+    transforms.append(tr.ToTensorV2())
 
     return alb.Compose(
         transforms,

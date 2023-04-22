@@ -7,6 +7,10 @@ class Logger(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def log_image_plot(self, data, label: str):        
+        raise NotImplementedError
+
+    @abstractmethod
     def log_image(self, image, predicted_boxes, prediction_scores, ground_truth_boxes, location:str=""):        
         raise NotImplementedError
 

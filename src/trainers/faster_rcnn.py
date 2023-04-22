@@ -4,7 +4,7 @@ import utils.metrics
 import utils.general
 import torchvision.models.detection
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-
+import utils.image as img
 class Trainer(trainers.base.BaseTrainer):
     def __init__(self, 
                  device: str,
@@ -63,7 +63,9 @@ class Trainer(trainers.base.BaseTrainer):
                 }
                 self.has_logged_image = True
                 self.logger.log_image(**parameters)
-            
+                image = img.generate_plot(inputs[i], nms_prediction, targets[i])
+                self.logger.log_image_plot(image, "Plot")
+                            
         return boxes
 
     @property

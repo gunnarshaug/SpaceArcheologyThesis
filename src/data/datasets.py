@@ -1,12 +1,11 @@
 import os
-import PIL
 import glob
 import xml.etree.ElementTree as ET
 import torch
 from torch.utils.data import Dataset
 import numpy as np
-import cv2
 import pandas as pd
+import PIL.Image
 
 class PascalVOCDataset(Dataset):
     """
@@ -106,11 +105,9 @@ class Dataset2022(Dataset):
         # self.img_dir = os.path.normpath(os.path.join(root_dir, "data"))
         # self.images = [image for image in sorted(os.listdir(self.img_dir))]
         
-        path = os.path.join(root_dir, "images/*.png")
+        path = os.path.join(root_dir, "data/*.png")
         normalized_path = os.path.normpath(path)
         self.images = sorted(glob.glob(normalized_path))
-        print(self.images)
-        
 
         annotations_file = os.path.join(root_dir, "classification.csv")
         self.img_labels = pd.read_csv(annotations_file)
@@ -124,7 +121,7 @@ class Dataset2022(Dataset):
         img_path = self.images[index]
         img_name = os.path.basename(img_path)
 
-        image = cv2.imread(img_path)
+        image = PIL.Image.open(img_path).convert('RGB')
 
         records = self.img_labels.loc[self.img_labels.filename == img_name]
         bounding_boxes = []
