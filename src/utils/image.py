@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
 def generate_plot(image, bboxes, gt_boxes=None) -> plt.Figure:
-    image = image.permute(1, 2, 0)
+    image = image.cpu().permute(1, 2, 0)
     
     fig, ax = plt.subplots()
     ax.imshow(image)
