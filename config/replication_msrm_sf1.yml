@@ -20,11 +20,11 @@ model:
 
 data:
   train_dirs:
-    - replication/datasets/Slope_RGB_Fixed_Val_Augmentation/train
+    - replication/datasets/MSRM_x1_RGB_Fixed_Val_Augmentation/train
   val_dirs:
-    - replication/datasets/Slope_RGB_Fixed_Val_Augmentation/val
+    - replication/datasets/MSRM_x1_RGB_Fixed_Val_Augmentation/val
   test_dirs: 
-    - replication/datasets/Slope_RGB_Fixed_Val_Augmentation/test
+    - replication/datasets/MSRM_x1_RGB_Fixed_Val_Augmentation/test
 
 dataloader:
   batch_size: 10
