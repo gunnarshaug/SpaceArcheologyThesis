@@ -44,7 +44,7 @@ model:
   save_checkpoints: False
   checkpoint_dir: checkpoints/MSRM_sf1
 training:
-  epochs: 1
+  epochs: 120
   optimizer:
     lr: 0.005
     momentum: 0.9
