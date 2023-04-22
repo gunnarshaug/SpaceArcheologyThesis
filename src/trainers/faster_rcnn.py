@@ -63,7 +63,7 @@ class Trainer(trainers.base.BaseTrainer):
                 }
                 self.has_logged_image = True
                 self.logger.log_image(**parameters)
-                image = img.generate_plot(inputs[i].cpu(), nms_prediction, targets[i])
+                image = img.generate_plot(inputs[i], nms_prediction, targets[i])
                 self.logger.log_image_plot(image, "Plot")
                             
         return boxes
