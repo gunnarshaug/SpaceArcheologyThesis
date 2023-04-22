@@ -1,9 +1,9 @@
 experiment:
   description: Replication
-  name: SLOPE
+  name: MSRM_sf2
   project: Replication
   tags:
-  - SLOPE
+  - MSRM_sf2
 
 classes:
   dataset: 
@@ -16,7 +16,7 @@ classes:
     module: wandb
 
 model:
-  checkpoint_dir: replication/checkpoints/SLOPE
+  checkpoint_dir: replication/checkpoints/MSRM_sf2
 
 data:
   train_dirs:
@@ -42,7 +42,7 @@ dataloader:
       - 0.225
 model:
   save_checkpoints: False
-  checkpoint_dir: checkpoints/slope
+  checkpoint_dir: checkpoints/MSRM_sf2
 training:
   epochs: 1
   optimizer:
