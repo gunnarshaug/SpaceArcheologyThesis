@@ -1,12 +1,11 @@
 import os
-import PIL
 import glob
 import xml.etree.ElementTree as ET
 import torch
 from torch.utils.data import Dataset
 import numpy as np
-import cv2
 import pandas as pd
+import PIL.Image
 
 class PascalVOCDataset(Dataset):
     """
@@ -102,8 +101,13 @@ class Dataset2022(Dataset):
             - classification.csv
     """
     def __init__(self, root_dir, transform=None) -> None:
-        self.img_dir = os.path.join(root_dir, "data")
-        self.images = [image for image in sorted(os.listdir(self.img_dir))]
+        # self.img_dir = os.path.join(root_dir, "data")
+        # self.img_dir = os.path.normpath(os.path.join(root_dir, "data"))
+        # self.images = [image for image in sorted(os.listdir(self.img_dir))]
+        
+        path = os.path.join(root_dir, "data/*.png")
+        normalized_path = os.path.normpath(path)
+        self.images = sorted(glob.glob(normalized_path))
 
         annotations_file = os.path.join(root_dir, "classification.csv")
         self.img_labels = pd.read_csv(annotations_file)
@@ -114,9 +118,10 @@ class Dataset2022(Dataset):
         return len(self.images)
 
     def __getitem__(self, index):
-        img_name = self.images[index]
-        img_path = os.path.join(self.img_dir, img_name)
-        image = cv2.imread(img_path)
+        img_path = self.images[index]
+        img_name = os.path.basename(img_path)
+
+        image = PIL.Image.open(img_path).convert('RGB')
 
         records = self.img_labels.loc[self.img_labels.filename == img_name]
         bounding_boxes = []
@@ -151,7 +156,7 @@ class Dataset2022(Dataset):
                 transformed_bounding_boxes = torch.zeros((0, 4), dtype=torch.float32)
 
         labels = torch.ones(len(records), dtype=torch.int64) # there is only one class
-        #NOTE: this will break if self.transform is false. transformed_bounding_boxes not defined
+
         tensor_bounding_boxes = torch.as_tensor(transformed_bounding_boxes, dtype=torch.float32)
         iscrowd = torch.zeros((tensor_bounding_boxes.shape[0],), dtype=torch.int64)
 

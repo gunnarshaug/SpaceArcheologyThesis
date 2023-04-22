@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader, ConcatDataset, Dataset
 import utils.general
 import albumentations as alb
-import albumentations.pytorch.transforms
+import albumentations.pytorch.transforms as tr
 
 class DataLoaders:
     """
@@ -44,7 +44,10 @@ class DataLoaders:
             is_train=is_train
         )
         assert len(dirs) > 0
-        return utils.general.generate_dataset(dirs, self.dataset_object, transform)
+        dataset = utils.general.generate_dataset(dirs, self.dataset_object, transform)
+        print(dirs)
+        assert len(dataset) > 0, "[!] Dataset cannot be empty"
+        return dataset
     
     @property
     def test_length(self):
@@ -113,13 +116,12 @@ def _get_transform(options: dict, is_train:bool=False) -> alb.Compose:
         
     mean = options.get("mean", [0.5, 0.5, 0.5])
     std = options.get("std", [0.5, 0.5, 0.5])
-    print(mean,std)
 
     transforms.append(
         alb.Normalize(mean=mean, std=std)
     )
     
-    transforms.append(alb.pytorch.transforms.ToTensorV2())
+    transforms.append(tr.ToTensorV2())
 
     return alb.Compose(
         transforms,

@@ -5,6 +5,7 @@ import numpy as np
 from abc import abstractproperty, abstractmethod
 from data.dataloaders import DataLoaders
 from torch.utils.data import DataLoader
+import loggers.logger as log
 
 class BaseTrainer:
     def __init__(self,
@@ -19,14 +20,18 @@ class BaseTrainer:
         self.log_step = int(np.sqrt(self.config["dataloader"]["batch_size"]))
         self.train_length = 0
         self.checkpoint_dir = self.config.get("model", {}).get("checkpoint_dir", "checkpoints")
+        self.save_checkpoints = self.config.get("model", {}).get("save_checkpoints", False)
         self._optimizer = self._get_optimizer()
         self._lr_scheduler = self._get_lr_scheduler()
 
-        logger_config = self.config["classes"]["logger"]        
+        logger_config = self.config["classes"]["logger"]
+             
         self.logger = utils.general.get_class(**logger_config)(
             **self.config["experiment"],
             config=self.config["training"]
         )
+        
+        assert isinstance(self.logger, log.Logger), "[!] Logger not configured properly"
         
     @abstractmethod
     def train_step(self, inputs, labels):
@@ -94,11 +99,12 @@ class BaseTrainer:
                 "Train/Precision": self.val_metrics.precision,
             })
             
-            self._save_checkpoint(epoch, save_best=self.val_metrics.is_improving)
+            if self.save_checkpoints or epoch == self.epochs:
+                self._save_checkpoint(epoch, save_best=self.val_metrics.is_improving)
             
         self.on_train_end()
         
-        
+                
     def test(self, data_loaders: DataLoaders):                
         self.logger.log_metrics({
             "NoImages/Test": data_loaders.test_length
