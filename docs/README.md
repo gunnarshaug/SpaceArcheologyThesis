@@ -21,7 +21,7 @@ It was used to copy local files to a remote host.
 ```
 rsync -av ./<src-folder>/ <hostname>:<dst-path>
 ```
-**Note:** Use linux with WSL for windows.
+**Note:** Download [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install) to use `rsync` with windows. 
 
 ### SLURM
 #### Interactive job
