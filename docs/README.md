@@ -25,6 +25,7 @@ rsync -av ./<src-folder>/ <hostname>:<dst-path>
 
 ### SLURM
 #### Interactive job
+Useful to troubleshoot, and use commands like `uenv avail` within a server not accessble with shh.
 ```
 srun --gres=gpu:0 --partition=gpuA100 --pty bash
 ```
