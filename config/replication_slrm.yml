@@ -1,9 +1,9 @@
 experiment:
   description: Replication
-  name: SLOPE
+  name: SLRM
   project: Replication
   tags:
-  - SLOPE
+  - SLRM
 
 classes:
   dataset: 
@@ -16,7 +16,7 @@ classes:
     module: wandb
 
 model:
-  checkpoint_dir: replication/checkpoints/SLOPE
+  checkpoint_dir: replication/checkpoints/SLRM
 
 data:
   train_dirs:
@@ -42,9 +42,9 @@ dataloader:
       - 0.225
 model:
   save_checkpoints: False
-  checkpoint_dir: checkpoints/slope
+  checkpoint_dir: checkpoints/SLRM
 training:
-  epochs: 1
+  epochs: 120
   optimizer:
     lr: 0.005
     momentum: 0.9
