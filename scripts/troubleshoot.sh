@@ -3,7 +3,6 @@
 #SBATCH --partition=gpuA100 
 #SBATCH --time=04:15:00
 #SBATCH --job-name=frcnn
-#SBATCH --nodelist=gorina8
 #SBATCH --output=frcnn.out
 
 uenv verbose cuda-11.4 cudnn-11.4-8.2.4
