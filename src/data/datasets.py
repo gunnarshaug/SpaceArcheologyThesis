@@ -102,19 +102,9 @@ class Dataset2022(Dataset):
     """
     def __init__(self, root_dir, transform=None) -> None:
         self.img_dir = os.path.join(root_dir, "data")
-        # self.img_dir = os.path.normpath(os.path.join(root_dir, "data"))
-        self.images = [image for image in sorted(os.listdir(self.img_dir)) if image.split(".")[-1].lower() == "png"]
+        self.images = [image for image in sorted(os.listdir(self.img_dir)) 
+                       if image.split(".")[-1].lower() == "png"]
         
-        # path = os.path.join(root_dir, "data/*.png")
-        # normalized_path = os.path.normpath(path)
-        # self.images = sorted(glob.glob(normalized_path))
-        print("root_dir: ", root_dir)
-        print("self.images: ", self.images)
-        # print("normalized_path: ", normalized_path)
-        # print("path: ", path)
-        # print("listdir path:", os.listdir(path))
-        print("listdir root_dir:", os.listdir(root_dir))
-
         annotations_file = os.path.join(root_dir, "classification.csv")
         self.img_labels = pd.read_csv(annotations_file)
 
@@ -126,9 +116,6 @@ class Dataset2022(Dataset):
     def __getitem__(self, index):
         img_name = self.images[index]
         img_path = os.path.join(self.img_dir, img_name)
-        print("img_name:")
-        print(img_name)
-        print()
         image = PIL.Image.open(img_path).convert('RGB')
 
         records = self.img_labels.loc[self.img_labels.filename == img_name]
