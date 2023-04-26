@@ -132,7 +132,7 @@ class Dataset2022(Dataset):
         image = PIL.Image.open(img_path).convert('RGB')
 
         records = self.img_labels.loc[self.img_labels.filename == img_name]
-        bounding_boxes, labels, area = []
+        bounding_boxes, labels, area = [], [], []
 
         for i in range(len(records)):
             record = records.iloc[i]
