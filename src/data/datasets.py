@@ -124,11 +124,11 @@ class Dataset2022(Dataset):
         return len(self.images)
 
     def __getitem__(self, index):
-        img_path = self.images[index]
-        print("IMG PATH: ", img_path)
-        img_name = os.path.basename(img_path)
-        print("IMG NAME: ", img_name)
-
+        img_name = self.images[index]
+        img_path = os.path.join(self.img_dir, img_name)
+        print("img_name:")
+        print(img_name)
+        print()
         image = PIL.Image.open(img_path).convert('RGB')
 
         records = self.img_labels.loc[self.img_labels.filename == img_name]
