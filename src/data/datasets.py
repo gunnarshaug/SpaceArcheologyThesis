@@ -101,18 +101,18 @@ class Dataset2022(Dataset):
             - classification.csv
     """
     def __init__(self, root_dir, transform=None) -> None:
-        # self.img_dir = os.path.join(root_dir, "data")
+        self.img_dir = os.path.join(root_dir, "data")
         # self.img_dir = os.path.normpath(os.path.join(root_dir, "data"))
-        # self.images = [image for image in sorted(os.listdir(self.img_dir))]
+        self.images = [image for image in sorted(os.listdir(self.img_dir)) if image.split(".")[1].lower() == "png"]
         
-        path = os.path.join(root_dir, "data/*.png")
-        normalized_path = os.path.normpath(path)
-        self.images = sorted(glob.glob(normalized_path))
+        # path = os.path.join(root_dir, "data/*.png")
+        # normalized_path = os.path.normpath(path)
+        # self.images = sorted(glob.glob(normalized_path))
         print("root_dir: ", root_dir)
         print("self.images: ", self.images)
-        print("normalized_path: ", normalized_path)
-        print("path: ", path)
-        print("listdir path:", os.listdir(path))
+        # print("normalized_path: ", normalized_path)
+        # print("path: ", path)
+        # print("listdir path:", os.listdir(path))
         print("listdir root_dir:", os.listdir(root_dir))
 
         annotations_file = os.path.join(root_dir, "classification.csv")
