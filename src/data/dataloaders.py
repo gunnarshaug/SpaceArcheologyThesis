@@ -45,7 +45,6 @@ class DataLoaders:
         )
         assert len(dirs) > 0
         dataset = utils.general.generate_dataset(dirs, self.dataset_object, transform)
-        print(dirs)
         assert len(dataset) > 0, "[!] Dataset cannot be empty"
         return dataset
     

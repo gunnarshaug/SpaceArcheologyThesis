@@ -32,7 +32,7 @@ class PascalVOCDataset(Dataset):
         path = os.path.join(self.root_dir, "images/*.tif")
         normalized_path = os.path.normpath(path)
         self.images = sorted(glob.glob(normalized_path))
-
+        
     def __len__(self):
         return len(self.images)
 
@@ -108,7 +108,12 @@ class Dataset2022(Dataset):
         path = os.path.join(root_dir, "data/*.png")
         normalized_path = os.path.normpath(path)
         self.images = sorted(glob.glob(normalized_path))
-        print(self.images)
+        print("root_dir: ", root_dir)
+        print("self.images: ", self.images)
+        print("normalized_path: ", normalized_path)
+        print("path: ", path)
+        print("listdir path:", os.listdir(path))
+        print("listdir root_dir:", os.listdir(root_dir))
 
         annotations_file = os.path.join(root_dir, "classification.csv")
         self.img_labels = pd.read_csv(annotations_file)
@@ -120,14 +125,14 @@ class Dataset2022(Dataset):
 
     def __getitem__(self, index):
         img_path = self.images[index]
+        print("IMG PATH: ", img_path)
         img_name = os.path.basename(img_path)
+        print("IMG NAME: ", img_name)
 
         image = PIL.Image.open(img_path).convert('RGB')
 
         records = self.img_labels.loc[self.img_labels.filename == img_name]
-        bounding_boxes = []
-        labels = []
-        area = []
+        bounding_boxes, labels, area = []
 
         for i in range(len(records)):
             record = records.iloc[i]
