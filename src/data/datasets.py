@@ -103,7 +103,7 @@ class Dataset2022(Dataset):
     def __init__(self, root_dir, transform=None) -> None:
         self.img_dir = os.path.join(root_dir, "data")
         # self.img_dir = os.path.normpath(os.path.join(root_dir, "data"))
-        self.images = [image for image in sorted(os.listdir(self.img_dir)) if image.split(".")[1].lower() == "png"]
+        self.images = [image for image in sorted(os.listdir(self.img_dir)) if image.split(".")[-1].lower() == "png"]
         
         # path = os.path.join(root_dir, "data/*.png")
         # normalized_path = os.path.normpath(path)
