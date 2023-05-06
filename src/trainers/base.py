@@ -24,6 +24,13 @@ class BaseTrainer:
         self._optimizer = self._get_optimizer()
         self._lr_scheduler = self._get_lr_scheduler()
 
+        optimizer_type = self.config["training"]["optimizer"]["type"]
+        error_msg = """	       
+                [!] lr_scheduler configured with wrong optimizer. 	               
+                Supported optimizer type to be used with lr_scheduler: 'sdg'
+            '""".format(optimizer_type)	            
+        assert (self._lr_scheduler is not None and optimizer_type == "sdg") or self._lr_scheduler is None, error_msg
+
         logger_config = self.config["classes"]["logger"]
              
         self.logger = utils.general.get_class(**logger_config)(
@@ -85,7 +92,8 @@ class BaseTrainer:
             self._train_epoch(epoch, train_dataloader)
             self._validate_epoch(epoch, val_dataloader)
             
-            self.lr_scheduler.step()
+            if self.lr_scheduler is not None:
+                self.lr_scheduler.step()
             
             
             self.logger.info("Val set: Precision: {:.6f} Recall: {:.6f}\n".format(
@@ -188,13 +196,13 @@ class BaseTrainer:
 
     @property
     def lr_scheduler(self):
-        assert self._lr_scheduler is not None
         return self._lr_scheduler
 
     def _get_lr_scheduler(self):
         scheduler_config = self.config.get("training", {}).get("scheduler", None)
-        assert scheduler_config is not None, "[!] lr_scheduler not properly configured"
-                
+
+        if scheduler_config is None: return None
+        
         supported_schedulers = ("steplr")
         assert scheduler_config["type"] in supported_schedulers, "[!] lr_scheduler must be on of the types: {}".format(supported_schedulers)
         
