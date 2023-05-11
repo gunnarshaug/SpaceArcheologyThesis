@@ -66,7 +66,7 @@ There are currently one implementation of the `Logger` class: `WandbLogger`. The
 
 ## Prepare Datasets
 The LiDAR datasets were downloaded from [Norwegian Mapping Authority](https://hoydedata.no), and the cultural heritage database from [GeoNorge](https://geonorge.no) where used to annotate the datasets.
-For more detailed information about preparing data: [Preprocessing in ArcGIS Pro](docs/preproecessing.md).
+For more detailed information about preparing data: [Preprocessing in ArcGIS Pro](documentation/preproecessing.md).
 
 ##  Train
 Using Slurm's job array structure, users can submit and run multiple instances of the same script independently. The following command creates an array of 4 jobs with index values of 0, 1, 2, and 3. The same job is executed with different configuration files using array jobs, which parallelize the computations. 
@@ -83,7 +83,7 @@ python src/train.py --config=<config_file.yml>
 The argument(s) supported by the python script:
 
 `--config`: Name of the configuration file, assuming it is located within the `config` folder. 
-  Default: `faster_rcnn.yml`.
+  Default: `config.yml`.
 
 
 ## Demo

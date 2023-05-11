@@ -10,7 +10,7 @@ def parse_args():
   parser = argparse.ArgumentParser(description='Pytorch Faster R-CNN')
   parser.add_argument('--config',
                       help='location of config file',
-                      default='faster_rcnn.yml', type=str)
+                      default='config.yml', type=str)
   return parser.parse_args()
 
 def main():
