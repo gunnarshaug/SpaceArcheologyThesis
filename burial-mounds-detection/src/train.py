@@ -15,7 +15,7 @@ def parse_args():
 
 def main():
   args = parse_args()
-  cfg_path = os.path.join("config", args.config)
+  cfg_path = os.path.join("configs", args.config)
 
   try:
     config = utils.general.load_cfg(cfg_path)
