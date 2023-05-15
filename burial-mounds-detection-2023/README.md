@@ -12,9 +12,7 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#demo">Demo</a></li>
-    <li><a href="#train">Train</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
+    <li><a href="#train">Train and Test</a></li>
   </ol>
 </details>
 
@@ -85,15 +83,3 @@ The argument(s) supported by the python script:
 `--config`: Name of the configuration file, assuming it is located within the `config` folder. 
   Default: `config.yml`.
 
-
-## Demo
-
-Run demo
-
-```
-python src/demo.py
-```
-
-## Previous Work
-Previous work at the University of Stavanger has explored various computer
-vision techniques for the purpose of mapping archeological structures. This work extends the work conducted on detecting burial mounds, and the notebook from [SpaceArcheology](https://github.com/arkadiy93/SpaceArcheologyThesis) were used as a starting point for this project. 
