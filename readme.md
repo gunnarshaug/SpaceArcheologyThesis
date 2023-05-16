@@ -3,9 +3,12 @@ This repository contains several large files, requiring [Git LFS](https://git-lf
 Make sure that Git LFS is installed before cloning the repository.
 To clone the repository use the "git lfs clone" command and not just "git clone".
 
-# Space Archaeology
+# Space Archaeology 
 
 Space Archaeology is a bachelor thesis project which has as goal to detect burial mounds, also termed tumili, from LiDAR based Digital Terrain Models and settlement mounds from Synthetic Aperture Radar Sentinel-1 satellite data.
+
+A subsequent study conducted in 2023 investigated the detection of burial mounds with Airborne LiDAR data in more detail. See [Deep Learning with Airborne LiDAR data](burial-mounds-detection-2023/README.md).
+
 
 The application supports 4 different types of relief models:
 
@@ -22,7 +25,7 @@ The application takes in a png file of the LiDAR based DTM data for each of the 
 For settlement mounds the application takes in a png file of the data and scans for SAR signatures which could be potential settlement mounds.
 
 
-	
+
 ## Installation
 
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install all the required libraries:

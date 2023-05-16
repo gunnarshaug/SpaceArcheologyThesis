@@ -1,0 +1,51 @@
+experiment:
+  project: ResNet50TransferLearningFasterR-CNN
+  name: MSRM_sf2
+  description: ResNet50 Transfer Learning on Faster R-CNN
+  tags:
+   - MSRM_sf2
+
+classes:
+  dataset: 
+    name: PascalVOCDataset
+    package: data
+    module: datasets
+  logger: 
+    name: WandbLogger
+    package: loggers
+    module: wandb
+
+model:
+  checkpoint_dir: checkpoints/msrm_sf2
+
+data:
+  train_dirs:
+    - datasets/processed/NDH_Ostfold_5pkt_2015/fredrikstad_sarpsborg/msrm_sf2
+    - datasets/processed/NDH_Steinkjer_5pkt_2017/steinkjer/msrm_sf2
+    - datasets/processed/NDH_Larvik_5pkt_2017/larvik_kaupang/msrm_sf2
+  val_dirs:
+    - datasets/processed/NDH_Ostfold_5pkt_2015/moss_naerum/msrm_sf2    
+    - datasets/processed/NDH_Rogaland_5pkt_2016/klepp/msrm_sf2
+    - datasets/processed/NDH_Stange_5pkt_2016/stange/msrm_sf2
+  test_dirs: 
+    - datasets/processed/NDH_Karmoy_Haugesund_5pkt_2017/avaldsnes/msrm_sf2
+    - datasets/processed/NDH_Larvik_5pkt_2017/larvik_hedrum/msrm_sf2
+    
+dataloader:
+  batch_size: 10
+  num_workers: 0
+  transform_opts: 
+    width: 224
+    height: 224
+training:
+  seed: 1
+  epochs: 120
+  optimizer:    
+    type: sdg
+    lr: 0.01
+    momentum: 0.9
+    weight_decay: 0.0005
+  scheduler: 
+    type: steplr
+    step_size: 30
+    gamma: 0.1
